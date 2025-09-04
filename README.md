@@ -2,6 +2,14 @@
 
 Project to import signups / emails in Google Sheets into DxE Signup service using Google Apps Script.
 
+## Development
+
+This project uses namespaces instead of module imports due to a limitation of Clasp:
+https://github.com/google/clasp/blob/master/docs/typescript.md#the-namespace-statement-workaround
+
+Note in VS Code, all related files need to be open in the editor to avoid errors in the editor. The TypeScript compiler
+will still compile the files regardless.
+
 ## Build
 
 Install dependencies:
@@ -24,7 +32,6 @@ Push according to .clasp.json
 npx clasp push
 ```
 
-// TODO: below does not apply yet, until we make a models.gs file:
 Then, in the Apps Script editor UI, click the "..." next to "models.gs" and
 click "Move file up" and repeat this until it appears above all other `.gs`
 files. This is necessary because other files import types from this file as
@@ -50,10 +57,13 @@ the required substitutions.
 Create an additional file called `secrets.ts` in this project with the contents below making the required substitutions.
 
 ```typescript
-export const config = {
-    signupServiceEnqueueUrl: "<URL OF SIGNUP SERVICE /enqueue ENDPOINT>",
-    signupServiceApiKey: "<YOUR API KEY>",
+namespace Secrets{
+    export const signupService = {
+        enqueueUrl: "<URL OF SIGNUP SERVICE /enqueue ENDPOINT>",
+        apiKey: "<YOUR API KEY>",
+    }
 }
+
 ```
 
 If using the devcontainer, the `rootDir` will be correct. Otherwise, use
