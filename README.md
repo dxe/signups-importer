@@ -47,6 +47,15 @@ the required substitutions.
 }
 ```
 
+Create an additional file called `secrets.ts` in this project with the contents below making the required substitutions.
+
+```typescript
+export const config = {
+    signupServiceEnqueueUrl: "<URL OF SIGNUP SERVICE /enqueue ENDPOINT>",
+    signupServiceApiKey: "<YOUR API KEY>",
+}
+```
+
 If using the devcontainer, the `rootDir` will be correct. Otherwise, use
 the path to the root of this repo on your machine.
 
