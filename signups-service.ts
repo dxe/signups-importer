@@ -1,10 +1,16 @@
 namespace SignupsService {
+    // Corresponds to Signup defined in
+    // https://github.com/dxe/signups-worker/blob/main/main.go
     export type Signup = {
         source: string,
         name: string,
         email: string,
         phone?: string,
         zip?: string,
+        country?: string,
+        donation_type?: string,
+        donation_amount?: string,
+        donation_date?: string,
     };
 
     export function enqueueSignup(payload: Signup) {

@@ -1,5 +1,8 @@
 
 namespace Chuffed {
+  // This value changes how the Signup service treats this data.
+  const chuffedSourceStr = "chuffed";
+
   // Function that gets a cell value from a row
   type GetterFunc = (name: string) => unknown;
   type ComputedColumnFunction = (get: GetterFunc) => unknown;
@@ -11,6 +14,7 @@ namespace Chuffed {
 
   export class ChuffedList {
     private orderedColumnSpecs: ColumnSpec[] = [
+      { normalizedName: "Source", fn: () => chuffedSourceStr },
       { originalName: "First Name", normalizedName: "First Name" },
       { originalName: "Last Name", normalizedName: "Last Name" },
       { originalName: "Email", normalizedName: "Email" },
@@ -88,6 +92,13 @@ namespace Chuffed {
 
       // Write normalized data starting at A1.
       newSheet.getRange(1, 1, newValues.length, desiredLen).setValues(newValues);
+
+      // Create new status columns
+      const statusColumns = ["Import date", "Import status", "Dry run status"]
+      newSheet.insertColumnsBefore(1, statusColumns.length)
+      newSheet.getRange(1, 1, 1, statusColumns.length).setValues([statusColumns])
+
+      // Show new sheet to user
       newSheet.activate()
     }
 
