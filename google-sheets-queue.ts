@@ -1,4 +1,6 @@
 namespace GoogleSheetsSignups {
+    import config = Configuration.config;
+
     export class GoogleSheetSignupQueue implements SignupsProcessor.SignupQueue {
         private headers: string[];
 
@@ -71,7 +73,7 @@ namespace GoogleSheetsSignups {
             const lastRow = this.sheet.getLastRow();
             for (this.i = 2; this.i <= lastRow; this.i++) {
                 const value = this.sheet.getRange(this.i, this.statusColumnIndex).getValue();
-                if (value === "OK") {
+                if (typeof (value) === 'string' && value.startsWith(config.rowStatusOkPrefix)) {
                     ok++;
                 } else if (value.length > 0) {
                     error++;

@@ -13,7 +13,12 @@ namespace SignupService {
         donation_date?: string,
     };
 
-    export function enqueueSignup(payload: Signup) {
+    export type SignupResponse = {
+        code: number,
+        message: string,
+    }
+
+    export function enqueueSignup(payload: Signup): SignupResponse {
         const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
             method: "post",
             headers: {
@@ -23,7 +28,9 @@ namespace SignupService {
             payload: JSON.stringify(payload)
         };
         const response = UrlFetchApp.fetch(Secrets.signupService.enqueueUrl, options);
-        console.log(response.getResponseCode());
-        console.log(response.getContentText());
+        return {
+            code: response.getResponseCode(),
+            message: response.getContentText()
+        }
     }
 }

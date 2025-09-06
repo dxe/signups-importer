@@ -6,6 +6,7 @@ namespace Main {
     import processSignups = SignupsProcessor.processSignups;
     import enqueueSignup = SignupService.enqueueSignup;
     import Signup = SignupService.Signup;
+    import config = Configuration.config;
 
     function getActiveSpreadsheet(): Spreadsheet {
         return SpreadsheetApp.getActiveSpreadsheet();
@@ -21,43 +22,47 @@ namespace Main {
         return normalizer.normalize();
     }
 
-    export function importActiveSheetDryRun() {
-        function logHandler(signup: Signup) {
-            console.log(signup)
-            return "OK"
+    export function importActiveSheet() {
+        function signupHandler(signup: Signup) {
+            const response = enqueueSignup(signup)
+            if (response.code === 200) {
+                return `${config.rowStatusOkPrefix} ${response.message}`
+            } else {
+                return `Code: ${response.code}; msg: ${response.message}`
+            }
         }
 
         processSignups(
             new GoogleSheetSignupQueue(
                 getActiveSheet(),
-                "Dry run status",
-                "Last dry run status update",
+                config.statusColumnName,
+                config.timestampColumnName,
             ),
-            logHandler,
+            signupHandler,
         )
     }
 
-    export function importActiveSheet() {
-        function signupHandler(signup: Signup) {
-            enqueueSignup(signup)
-            return "OK"
+    export function importActiveSheetDryRun() {
+        function logHandler(signup: Signup) {
+            console.log(signup)
+            return `${config.rowStatusOkPrefix} logged`
         }
 
         processSignups(
             new GoogleSheetSignupQueue(
                 getActiveSheet(),
-                "Import status",
-                "Last status update",
+                config.dryRunStatusColumnName,
+                config.dryRuntimestampColumnName,
             ),
-            signupHandler,
+            logHandler,
         )
     }
 
     export function computeAndLogSummary() {
         console.log(new GoogleSheetSignupQueue(
             getActiveSheet(),
-            "Import status",
-            "Last status update",
+            config.statusColumnName,
+            config.timestampColumnName,
         ).computeSummary());
     }
 }
