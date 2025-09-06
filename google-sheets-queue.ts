@@ -52,19 +52,20 @@ namespace GoogleSheetsSignups {
                 }
             }
 
-            const payload = {
+            const signup: SignupService.Signup = {
                 "source": this.getField("Source"),
-                "name": this.getField("First Name") + " " + this.getField("Last Name"),
+                "first_name": this.getField("First Name"),
+                "last_name": this.getField("Last Name"),
                 "email": this.getField("Email"),
             };
-            maybeSet(payload, "phone", this.getField("Phone"))
-            maybeSet(payload, "zip", this.getField("Zip"))
-            maybeSet(payload, "country", this.getField("Country"))
-            maybeSet(payload, "donation_type", this.getField("Donation Type"))
-            maybeSet(payload, "donation_amount", this.getField("Donation Amount"))
-            maybeSet(payload, "donation_date", this.getField("Donation Date"))
+            maybeSet(signup, "phone", this.getField("Phone"))
+            maybeSet(signup, "zip", this.getField("Zip"))
+            maybeSet(signup, "country", this.getField("Country"))
+            maybeSet(signup, "donation_type", this.getField("Donation Type"))
+            maybeSet(signup, "donation_amount", this.getField("Donation Amount"))
+            maybeSet(signup, "donation_date", this.getField("Donation Date"))
 
-            return payload;
+            return signup;
         }
 
         private getField(fieldName: string): string | undefined {

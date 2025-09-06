@@ -1,5 +1,5 @@
 namespace SignupsProcessor {
-    export type SignupHandlerFunc = (payload: SignupService.Signup) => string;
+    export type SignupHandlerFunc = (signup: SignupService.Signup) => string;
 
     export type SignupQueue = {
         getUnprocessedSignups(): Generator<SignupService.Signup>

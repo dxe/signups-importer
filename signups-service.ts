@@ -3,7 +3,8 @@ namespace SignupService {
     // https://github.com/dxe/signups-worker/blob/main/main.go
     export type Signup = {
         source: string,
-        name: string,
+        first_name: string,
+        last_name: string,
         email: string,
         phone?: string,
         zip?: string,
@@ -18,14 +19,14 @@ namespace SignupService {
         message: string,
     }
 
-    export function enqueueSignup(payload: Signup): SignupResponse {
+    export function enqueueSignup(signup: Signup): SignupResponse {
         const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
             method: "post",
             headers: {
                 "X-api-key": Secrets.signupService.apiKey,
                 "Content-Type": "application/json"
             },
-            payload: JSON.stringify(payload)
+            payload: JSON.stringify(signup)
         };
         // const response = UrlFetchApp.fetch(Secrets.signupService.enqueueUrl, options);
         // return {
