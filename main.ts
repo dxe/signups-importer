@@ -5,75 +5,73 @@ namespace Main {
     import Sheet = GoogleAppsScript.Spreadsheet.Sheet;
 
     export class SignupsImporter {
-        private readonly config = Configuration.config;
-
-        getActiveSpreadsheet(): Spreadsheet {
+        private getActiveSpreadsheet(): Spreadsheet {
             return SpreadsheetApp.getActiveSpreadsheet();
         }
 
-        getActiveSheet(): Sheet {
+        private getActiveSheet(): Sheet {
             return this.getActiveSpreadsheet().getActiveSheet();
         }
 
-        public normalizeChuffed() {
+        normalizeChuffed() {
             const normalizer = new ListNormalization.ColumnSpecNormalizer(
                 new Chuffed.ChuffedColumnSpec(), this.getActiveSheet(), this.getActiveSpreadsheet());
             return normalizer.normalize();
         }
 
-        public importActiveSheet() {
-            function signupHandler(signup: SignupService.Signup) {
-                const response = SignupService.enqueueSignup(signup)
-                if (response.code === 200) {
-                    return `${this.config.rowStatusOkPrefix} ${response.message}`
-                } else {
-                    return `Code: ${response.code}; msg: ${response.message}`
-                }
+        private signupHandler(signup: SignupService.Signup) {
+            const response = SignupService.enqueueSignup(signup)
+            if (response.code === 200) {
+                return `${Configuration.config.rowStatusOkPrefix} ${response.message}`
+            } else {
+                return `Code: ${response.code}; msg: ${response.message}`
             }
+        }
 
+        importActiveSheet() {
             SignupsProcessor.processSignups(
                 new GoogleSheetsSignups.GoogleSheetSignupQueue(
                     this.getActiveSheet(),
-                    this.config.statusColumnName,
-                    this.config.timestampColumnName,
+                    Configuration.config.statusColumnName,
+                    Configuration.config.timestampColumnName,
                 ),
-                signupHandler,
+                this.signupHandler,
             )
         }
 
-        public importActiveSheetDryRun() {
-            function logHandler(signup: SignupService.Signup) {
-                console.log(signup)
-                return `${this.config.rowStatusOkPrefix} logged`
-            }
-
+        importActiveSheetDryRun() {
             SignupsProcessor.processSignups(
                 new GoogleSheetsSignups.GoogleSheetSignupQueue(
                     this.getActiveSheet(),
-                    this.config.dryRunStatusColumnName,
-                    this.config.dryRunTimestampColumnName,
+                    Configuration.config.dryRunStatusColumnName,
+                    Configuration.config.dryRunTimestampColumnName,
                 ),
-                logHandler,
+                this.logHandler,
             )
         }
 
-        public computeAndLogSummary() {
+        private logHandler(signup: SignupService.Signup) {
+            console.log(signup)
+            return `${Configuration.config.rowStatusOkPrefix} logged`
+        }
+
+        computeAndLogSummary() {
             console.log(new GoogleSheetsSignups.GoogleSheetSignupQueue(
                 this.getActiveSheet(),
-                this.config.statusColumnName,
-                this.config.timestampColumnName,
+                Configuration.config.statusColumnName,
+                Configuration.config.timestampColumnName,
             ).computeSummary());
         }
     }
 }
 
-function NormalizeChuffed() {
+function NormalizeChuffedList() {
     (new Main.SignupsImporter()).normalizeChuffed()
 }
-function ImportActiveSheetDryRun() {
+function StartOrContinueDryRun() {
     (new Main.SignupsImporter()).importActiveSheetDryRun()
 }
-function ImportActiveSheet() {
+function StartOrContinueImportToSignupService() {
     (new Main.SignupsImporter()).importActiveSheet()
 }
 function ComputeAndLogSummary() {
@@ -83,8 +81,9 @@ function ComputeAndLogSummary() {
 function onOpen() {
     var ui = SpreadsheetApp.getUi();
     ui.createMenu('Signups Importer')
-        .addItem('Normalize Chuffed list', 'NormalizeChuffed')
-        .addItem('Start/continue dry-run', 'ImportActiveSheetDryRun')
-        .addItem('Start/continue import to Signup Service', 'ImportActiveSheet')
+        .addItem('Normalize Chuffed list', 'NormalizeChuffedList')
+        .addItem('Start/continue dry-run', 'StartOrContinueDryRun')
+        .addItem('Start/continue import to Signup Service', 'StartOrContinueImportToSignupService')
+        .addItem('Compute and log summary', 'ComputeAndLogSummary')
         .addToUi();
 }

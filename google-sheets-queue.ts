@@ -1,8 +1,8 @@
 namespace GoogleSheetsSignups {
-    import config = Configuration.config;
-
     export class GoogleSheetSignupQueue implements SignupsProcessor.SignupQueue {
-        private headers: string[];
+        private config = Configuration.config;
+        private data: unknown[][];
+        private headers: unknown[];
 
         private statusColumnIndex: number;
         private timestampColumnIndex: number;
@@ -15,22 +15,34 @@ namespace GoogleSheetsSignups {
             private readonly statusColumnName: string,
             private readonly timestampColumnName: string,
         ) {
-            const lastColumn = this.sheet.getLastColumn();
-            this.headers = this.sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
+            this.data = this.sheet.getRange(1, 1, this.sheet.getLastRow(), this.sheet.getLastColumn()).getValues()
+            this.headers = this.data[0];
             this.statusColumnIndex = this.headers.indexOf(this.statusColumnName);
+            if (this.statusColumnIndex === -1) {
+                throw new Error("Could not find status column")
+            }
             this.timestampColumnIndex = this.headers.indexOf(this.timestampColumnName);
+            if (this.timestampColumnIndex === -1) {
+                throw new Error("Could not find timestamp column")
+            }
+
+            if (this.timestampColumnIndex !== this.statusColumnIndex + 1) {
+                throw new Error("Timestamp column must be immediately right of status column");
+            }
         }
 
-        *getSignups(): Generator<SignupService.Signup> {
-            const lastRow = this.sheet.getLastRow();
-            for (this.i = 2; this.i <= lastRow; this.i++) {
+        *getUnprocessedSignups(): Generator<SignupService.Signup> {
+            for (this.i = 1; this.i < this.data.length; this.i++) {
+                if (this.data[this.i][this.statusColumnIndex] !== '') {
+                    // Skip already-processed row.
+                    continue;
+                }
                 yield this.createSignupFromCurrentRow();
             }
         }
 
         recordStatus(status: string) {
-            this.sheet.getRange(this.i, this.statusColumnIndex, 1, 1).setValue(status);
-            this.sheet.getRange(this.i, this.timestampColumnIndex, 1, 1).setValue(new Date().toISOString());
+            this.sheet.getRange(this.i + 1, this.statusColumnIndex + 1, 1, 2).setValues([[status, new Date().toISOString()]]);
         }
 
         private createSignupFromCurrentRow() {
@@ -55,14 +67,11 @@ namespace GoogleSheetsSignups {
             return payload;
         }
 
-        private getField(fieldName: string) {
+        private getField(fieldName: string): string | undefined {
             const index = this.headers.indexOf(fieldName);
             if (index === -1) throw Error(`Column not found: "${fieldName}"`);
-            let value = this.sheet.getRange(this.i, index + 1).getValue();
-            if (typeof (value) === 'number') {
-                value = value.toString()
-            }
-            return value.trim();
+            let value = this.data[this.i][index];
+            return value.toString();
         }
 
         public computeSummary(): string {
@@ -71,11 +80,13 @@ namespace GoogleSheetsSignups {
             let error = 0;
 
             const lastRow = this.sheet.getLastRow();
-            for (this.i = 2; this.i <= lastRow; this.i++) {
-                const value = this.sheet.getRange(this.i, this.statusColumnIndex).getValue();
-                if (typeof (value) === 'string' && value.startsWith(config.rowStatusOkPrefix)) {
+            for (this.i = 1; this.i < lastRow; this.i++) {
+                const value = this.data[this.i][this.statusColumnIndex];
+                if (typeof (value) === 'string' && value.startsWith(this.config.rowStatusOkPrefix)) {
                     ok++;
-                } else if (value.length > 0) {
+                } else if (value === null) {
+                    blank++
+                } else if (value.toString().length > 0) {
                     error++;
                 } else {
                     blank++;

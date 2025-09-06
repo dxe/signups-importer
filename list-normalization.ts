@@ -75,6 +75,9 @@ namespace ListNormalization {
                 if (this.columnSpec.postprocess !== undefined) {
                     const setterFunc = (columnName: string, value: unknown) => {
                         const setIndex = this.orderedColumnSpecs.findIndex(spec => spec.normalizedName === columnName);
+                        if (setIndex === -1) {
+                            throw new Error("Could not find column " + columnName)
+                        }
                         row[setIndex] = value;
                     }
                     this.columnSpec.postprocess(getterFunc, setterFunc);

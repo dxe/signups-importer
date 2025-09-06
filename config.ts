@@ -2,8 +2,8 @@ namespace Configuration {
     export const config = {
         rowStatusOkPrefix: "OK:",
         statusColumnName: "Import status",
-        timestampColumnName: "Last status update",
+        timestampColumnName: "Import status timestamp",
         dryRunStatusColumnName: "Dry run status",
-        dryRunTimestampColumnName: "Last dry run status update",
+        dryRunTimestampColumnName: "Dry run status timestamp",
     };
 }
