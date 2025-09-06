@@ -1,27 +1,78 @@
 namespace Main {
+    import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet;
+    import Sheet = GoogleAppsScript.Spreadsheet.Sheet;
+    import ColumnSpecNormalizer = ListNormalization.ColumnSpecNormalizer;
+    import GoogleSheetSignupQueue = GoogleSheetsSignups.GoogleSheetSignupQueue;
+    import processSignups = SignupsProcessor.processSignups;
+    import enqueueSignup = SignupService.enqueueSignup;
+    import Signup = SignupService.Signup;
 
-}
+    function getActiveSpreadsheet(): Spreadsheet {
+        return SpreadsheetApp.getActiveSpreadsheet();
+    }
 
-function getActiveSpreadsheet() {
-    return SpreadsheetApp.getActiveSpreadsheet();
-}
+    function getActiveSheet(): Sheet {
+        return getActiveSpreadsheet().getActiveSheet();
+    }
 
-function getActiveSheet() {
-    return getActiveSpreadsheet().getActiveSheet();
+    export function normalizeChuffed() {
+        const normalizer = new ColumnSpecNormalizer(
+            new Chuffed.ChuffedColumnSpec(), getActiveSheet(), getActiveSpreadsheet());
+        return normalizer.normalize();
+    }
+
+    export function importActiveSheetDryRun() {
+        function logHandler(signup: Signup) {
+            console.log(signup)
+            return "OK"
+        }
+
+        processSignups(
+            new GoogleSheetSignupQueue(
+                getActiveSheet(),
+                "Dry run status",
+                "Last dry run status update",
+            ),
+            logHandler,
+        )
+    }
+
+    export function importActiveSheet() {
+        function signupHandler(signup: Signup) {
+            enqueueSignup(signup)
+            return "OK"
+        }
+
+        processSignups(
+            new GoogleSheetSignupQueue(
+                getActiveSheet(),
+                "Import status",
+                "Last status update",
+            ),
+            signupHandler,
+        )
+    }
+
+    export function computeAndLogSummary() {
+        console.log(new GoogleSheetSignupQueue(
+            getActiveSheet(),
+            "Import status",
+            "Last status update",
+        ).computeSummary());
+    }
 }
 
 function NormalizeChuffed() {
-    const normalizer = new ListNormalization.ColumnSpecNormalizer(
-        new Chuffed.ChuffedColumnSpec(), getActiveSheet(), getActiveSpreadsheet());
-    return normalizer.normalize();
+    Main.normalizeChuffed()
 }
-
 function ImportActiveSheetDryRun() {
-    SignupsProcessor.processSignups(getActiveSheet(), console.log, "Import status")
+    Main.importActiveSheetDryRun()
 }
-
 function ImportActiveSheet() {
-    SignupsProcessor.processSignups(getActiveSheet(), SignupsService.enqueueSignup, "Dry run status")
+    Main.importActiveSheet()
+}
+function ComputeAndLogSummary() {
+    Main.computeAndLogSummary()
 }
 
 function onOpen() {

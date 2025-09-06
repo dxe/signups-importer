@@ -72,6 +72,6 @@ the path to the root of this repo on your machine.
 Now you can deploy using the instructions under the "Deploy" section of this
 README.
 
-Use the `<...todo...>` menu created by this sheet to set up a new sheet.
+Use the `Signups Importer` menu created by this sheet to set up a new sheet.
 
 See the comments in `<...todo...>.ts` for detailed usage instructions.

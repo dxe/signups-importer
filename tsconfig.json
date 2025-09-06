@@ -1,4 +1,12 @@
 {
-    "include": ["./**/*"],
-    "exclude": ["node_modules"],
+    "include": [
+        "./**/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ],
+    "compilerOptions": {
+        // Not actually sure what version most closely resembles what Apps Script V8 runtime runs on.
+        "target": "es6",
+    }
 }

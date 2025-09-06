@@ -1,4 +1,4 @@
-namespace SignupsService {
+namespace SignupService {
     // Corresponds to Signup defined in
     // https://github.com/dxe/signups-worker/blob/main/main.go
     export type Signup = {
