@@ -28,7 +28,7 @@ namespace Main {
             }
         }
 
-        importActiveSheet() {
+        importActiveSheet(limit: number) {
             SignupsProcessor.processSignups(
                 new GoogleSheetsSignups.GoogleSheetSignupQueue(
                     this.getActiveSheet(),
@@ -36,10 +36,11 @@ namespace Main {
                     Configuration.config.timestampColumnName,
                 ),
                 this.signupHandler,
+                limit,
             )
         }
 
-        importActiveSheetDryRun() {
+        importActiveSheetDryRun(limit: number) {
             SignupsProcessor.processSignups(
                 new GoogleSheetsSignups.GoogleSheetSignupQueue(
                     this.getActiveSheet(),
@@ -47,6 +48,7 @@ namespace Main {
                     Configuration.config.dryRunTimestampColumnName,
                 ),
                 this.logHandler,
+                limit,
             )
         }
 
@@ -68,11 +70,23 @@ namespace Main {
 function NormalizeChuffedList() {
     (new Main.SignupsImporter()).normalizeChuffed()
 }
-function StartOrContinueDryRun() {
-    (new Main.SignupsImporter()).importActiveSheetDryRun()
+function StartOrContinueDryRun1() {
+    (new Main.SignupsImporter()).importActiveSheetDryRun(1)
 }
-function StartOrContinueImportToSignupService() {
-    (new Main.SignupsImporter()).importActiveSheet()
+function StartOrContinueDryRun5() {
+    (new Main.SignupsImporter()).importActiveSheetDryRun(5)
+}
+function StartOrContinueDryRun100() {
+    (new Main.SignupsImporter()).importActiveSheetDryRun(100)
+}
+function StartOrContinueImportToSignupService1() {
+    (new Main.SignupsImporter()).importActiveSheet(1)
+}
+function StartOrContinueImportToSignupService5() {
+    (new Main.SignupsImporter()).importActiveSheet(5)
+}
+function StartOrContinueImportToSignupService100() {
+    (new Main.SignupsImporter()).importActiveSheet(100)
 }
 function ComputeAndLogSummary() {
     (new Main.SignupsImporter()).computeAndLogSummary()
@@ -80,10 +94,21 @@ function ComputeAndLogSummary() {
 
 function onOpen() {
     var ui = SpreadsheetApp.getUi();
-    ui.createMenu('Signups Importer')
+    const menu = ui.createMenu('Signups Importer')
         .addItem('Normalize Chuffed list', 'NormalizeChuffedList')
-        .addItem('Start/continue dry-run', 'StartOrContinueDryRun')
-        .addItem('Start/continue import to Signup Service', 'StartOrContinueImportToSignupService')
+
+        .addSubMenu(
+            ui.createMenu("Dry-run")
+                .addItem('Next 1 item', 'StartOrContinueDryRun1')
+                .addItem('Next 5 items', 'StartOrContinueDryRun5')
+                .addItem('Next 100 items', 'StartOrContinueDryRun100')
+        )
+        .addSubMenu(
+            ui.createMenu("Send to Signup Service")
+                .addItem('Next 1 item', 'StartOrContinueImportToSignupService1')
+                .addItem('Next 5 items', 'StartOrContinueImportToSignupService5')
+                .addItem('Next 100 items', 'StartOrContinueImportToSignupService100')
+        )
         .addItem('Compute and log summary', 'ComputeAndLogSummary')
         .addToUi();
 }

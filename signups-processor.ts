@@ -9,6 +9,7 @@ namespace SignupsProcessor {
     export function processSignups(
         queue: SignupQueue,
         handler: SignupHandlerFunc,
+        limit: number
     ) {
         let count = 0;
         for (const signup of queue.getUnprocessedSignups()) {
@@ -22,7 +23,7 @@ namespace SignupsProcessor {
             count++;
 
             // Quit before Google Apps Script execution times out.
-            if (count >= 5) {
+            if (count >= limit) {
                 return;
             }
         }
