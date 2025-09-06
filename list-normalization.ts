@@ -1,6 +1,8 @@
 namespace ListNormalization {
-    // Function that gets a cell value from a row
+    // Function that gets a cell value from a row using the original (pre-normalization) column name
     export type GetterFunc = (name: string) => unknown;
+    // Function that sets a cell value using the normalized name defined in the column spec.
+    export type SetterFunc = (name: string, value: unknown) => void;
     export type ComputedColumnFunction = (get: GetterFunc) => unknown;
     export type ColumnSpec = {
         normalizedName: string,
@@ -10,6 +12,7 @@ namespace ListNormalization {
 
     export type ColumnSpecNormalization = {
         getColumnSpec(): ColumnSpec[];
+        postprocess?(get: GetterFunc, set: SetterFunc): void;
     }
 
     export class ColumnSpecNormalizer {
@@ -53,6 +56,7 @@ namespace ListNormalization {
             for (let r = 1; r < lastRow; r++) {
                 const row = new Array<unknown>(desiredLen);
                 const oldRow = values[r];
+                const getterFunc = name => ColumnSpecNormalizer.getValue(name, oldRow, headerIndexes)
                 for (let c = 0; c < desiredLen; c++) {
                     const columnSpec = this.orderedColumnSpecs[c];
                     let newCellValue;
@@ -64,9 +68,16 @@ namespace ListNormalization {
                         }
                         newCellValue = oldRow[srcIdx]
                     } else {
-                        newCellValue = columnSpec.fn(name => ColumnSpecNormalizer.getValue(name, oldRow, headerIndexes))
+                        newCellValue = columnSpec.fn(getterFunc)
                     }
                     row[c] = newCellValue
+                }
+                if (this.columnSpec.postprocess !== undefined) {
+                    const setterFunc = (columnName: string, value: unknown) => {
+                        const setIndex = this.orderedColumnSpecs.findIndex(spec => spec.normalizedName === columnName);
+                        row[setIndex] = value;
+                    }
+                    this.columnSpec.postprocess(getterFunc, setterFunc);
                 }
                 newValues[r] = row;
             }
