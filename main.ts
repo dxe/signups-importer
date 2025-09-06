@@ -1,83 +1,83 @@
 namespace Main {
+    // Import GoogleAppsScript types
+    // Do not try to import types from namespaces defined in this project. See README for details.
     import Spreadsheet = GoogleAppsScript.Spreadsheet.Spreadsheet;
     import Sheet = GoogleAppsScript.Spreadsheet.Sheet;
-    import ColumnSpecNormalizer = ListNormalization.ColumnSpecNormalizer;
-    import GoogleSheetSignupQueue = GoogleSheetsSignups.GoogleSheetSignupQueue;
-    import processSignups = SignupsProcessor.processSignups;
-    import enqueueSignup = SignupService.enqueueSignup;
-    import Signup = SignupService.Signup;
-    import config = Configuration.config;
 
-    function getActiveSpreadsheet(): Spreadsheet {
-        return SpreadsheetApp.getActiveSpreadsheet();
-    }
+    export class SignupsImporter {
+        private readonly config = Configuration.config;
 
-    function getActiveSheet(): Sheet {
-        return getActiveSpreadsheet().getActiveSheet();
-    }
+        getActiveSpreadsheet(): Spreadsheet {
+            return SpreadsheetApp.getActiveSpreadsheet();
+        }
 
-    export function normalizeChuffed() {
-        const normalizer = new ColumnSpecNormalizer(
-            new Chuffed.ChuffedColumnSpec(), getActiveSheet(), getActiveSpreadsheet());
-        return normalizer.normalize();
-    }
+        getActiveSheet(): Sheet {
+            return this.getActiveSpreadsheet().getActiveSheet();
+        }
 
-    export function importActiveSheet() {
-        function signupHandler(signup: Signup) {
-            const response = enqueueSignup(signup)
-            if (response.code === 200) {
-                return `${config.rowStatusOkPrefix} ${response.message}`
-            } else {
-                return `Code: ${response.code}; msg: ${response.message}`
+        public normalizeChuffed() {
+            const normalizer = new ListNormalization.ColumnSpecNormalizer(
+                new Chuffed.ChuffedColumnSpec(), this.getActiveSheet(), this.getActiveSpreadsheet());
+            return normalizer.normalize();
+        }
+
+        public importActiveSheet() {
+            function signupHandler(signup: SignupService.Signup) {
+                const response = SignupService.enqueueSignup(signup)
+                if (response.code === 200) {
+                    return `${this.config.rowStatusOkPrefix} ${response.message}`
+                } else {
+                    return `Code: ${response.code}; msg: ${response.message}`
+                }
             }
+
+            SignupsProcessor.processSignups(
+                new GoogleSheetsSignups.GoogleSheetSignupQueue(
+                    this.getActiveSheet(),
+                    this.config.statusColumnName,
+                    this.config.timestampColumnName,
+                ),
+                signupHandler,
+            )
         }
 
-        processSignups(
-            new GoogleSheetSignupQueue(
-                getActiveSheet(),
-                config.statusColumnName,
-                config.timestampColumnName,
-            ),
-            signupHandler,
-        )
-    }
+        public importActiveSheetDryRun() {
+            function logHandler(signup: SignupService.Signup) {
+                console.log(signup)
+                return `${this.config.rowStatusOkPrefix} logged`
+            }
 
-    export function importActiveSheetDryRun() {
-        function logHandler(signup: Signup) {
-            console.log(signup)
-            return `${config.rowStatusOkPrefix} logged`
+            SignupsProcessor.processSignups(
+                new GoogleSheetsSignups.GoogleSheetSignupQueue(
+                    this.getActiveSheet(),
+                    this.config.dryRunStatusColumnName,
+                    this.config.dryRuntimestampColumnName,
+                ),
+                logHandler,
+            )
         }
 
-        processSignups(
-            new GoogleSheetSignupQueue(
-                getActiveSheet(),
-                config.dryRunStatusColumnName,
-                config.dryRuntimestampColumnName,
-            ),
-            logHandler,
-        )
-    }
-
-    export function computeAndLogSummary() {
-        console.log(new GoogleSheetSignupQueue(
-            getActiveSheet(),
-            config.statusColumnName,
-            config.timestampColumnName,
-        ).computeSummary());
+        public computeAndLogSummary() {
+            console.log(new GoogleSheetsSignups.GoogleSheetSignupQueue(
+                this.getActiveSheet(),
+                this.config.statusColumnName,
+                this.config.timestampColumnName,
+            ).computeSummary());
+        }
     }
 }
 
 function NormalizeChuffed() {
-    Main.normalizeChuffed()
+    (new Main.SignupsImporter()).normalizeChuffed()
 }
 function ImportActiveSheetDryRun() {
-    Main.importActiveSheetDryRun()
+    (new Main.SignupsImporter()).importActiveSheetDryRun()
 }
 function ImportActiveSheet() {
-    Main.importActiveSheet()
+    (new Main.SignupsImporter()).importActiveSheet()
 }
 function ComputeAndLogSummary() {
-    Main.computeAndLogSummary()
+    (new Main.SignupsImporter()).computeAndLogSummary()
 }
 
 function onOpen() {

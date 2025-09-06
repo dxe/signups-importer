@@ -10,6 +10,30 @@ https://github.com/google/clasp/blob/master/docs/typescript.md#the-namespace-sta
 Note in VS Code, all related files need to be open in the editor to avoid errors in the editor. The TypeScript compiler
 will still compile the files regardless.
 
+### Google Apps Script namespace issues
+
+Do not try to import types at the namespace level from other namespaces defined in this project: Google Apps Script will
+error out when it loads the files in alphabetical order, executing files before necessarily loading other files it
+depends on.
+
+```typescript
+// A.ts
+
+namespace A {
+    import Bfoo = B.Bfoo  // Do not do this. File `B.ts` will not be loaded yet when this runs.
+
+    function x() {
+        new B.Bfoo();  // This is OK. Just need to fully-qualify imported types with each use.
+    }
+}
+
+// B.ts
+
+namespace B {
+    class Bfoo {}
+}
+```
+
 ## Build
 
 Install dependencies:
@@ -31,11 +55,6 @@ Push according to .clasp.json
 ```bash
 npx clasp push
 ```
-
-Then, in the Apps Script editor UI, click the "..." next to "models.gs" and
-click "Move file up" and repeat this until it appears above all other `.gs`
-files. This is necessary because other files import types from this file as
-soon as they load.
 
 ## Initial setup
 
