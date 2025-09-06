@@ -4,6 +4,6 @@ namespace Configuration {
         statusColumnName: "Import status",
         timestampColumnName: "Last status update",
         dryRunStatusColumnName: "Dry run status",
-        dryRuntimestampColumnName: "Last dry run status update",
+        dryRunTimestampColumnName: "Last dry run status update",
     };
 }

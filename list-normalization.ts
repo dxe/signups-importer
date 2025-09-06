@@ -97,7 +97,12 @@ namespace ListNormalization {
             newSheet.getRange(1, 1, newValues.length, desiredLen).setValues(newValues);
 
             // Create new status columns
-            const statusColumns = ["Import date", "Import status", "Dry run status"]
+            const statusColumns = [
+                Configuration.config.dryRunStatusColumnName,
+                Configuration.config.dryRunTimestampColumnName,
+                Configuration.config.statusColumnName,
+                Configuration.config.timestampColumnName,
+            ]
             newSheet.insertColumnsBefore(1, statusColumns.length)
             newSheet.getRange(1, 1, 1, statusColumns.length).setValues([statusColumns])
 

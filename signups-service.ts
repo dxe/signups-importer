@@ -27,10 +27,14 @@ namespace SignupService {
             },
             payload: JSON.stringify(payload)
         };
-        const response = UrlFetchApp.fetch(Secrets.signupService.enqueueUrl, options);
+        // const response = UrlFetchApp.fetch(Secrets.signupService.enqueueUrl, options);
+        // return {
+        //     code: response.getResponseCode(),
+        //     message: response.getContentText()
+        // }
         return {
-            code: response.getResponseCode(),
-            message: response.getContentText()
+            code: 200,
+            message: "FAKE SIGNUP",
         }
     }
 }

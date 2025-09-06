@@ -51,7 +51,7 @@ namespace Main {
                 new GoogleSheetsSignups.GoogleSheetSignupQueue(
                     this.getActiveSheet(),
                     this.config.dryRunStatusColumnName,
-                    this.config.dryRuntimestampColumnName,
+                    this.config.dryRunTimestampColumnName,
                 ),
                 logHandler,
             )
