@@ -11,8 +11,9 @@ function getActiveSheet() {
 }
 
 function NormalizeChuffed() {
-    const chuffedList = new Chuffed.ChuffedList(getActiveSheet(), getActiveSpreadsheet());
-    chuffedList.normalize();
+    const normalizer = new ListNormalization.ColumnSpecNormalizer(
+        new Chuffed.ChuffedColumnSpec(), getActiveSheet(), getActiveSpreadsheet());
+    return normalizer.normalize();
 }
 
 function ImportActiveSheetDryRun() {
