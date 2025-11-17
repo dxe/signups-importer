@@ -2,6 +2,8 @@ namespace SignupService {
     // Corresponds to Signup defined in
     // https://github.com/dxe/signups-worker/blob/main/main.go
     export type Signup = {
+        // sources should be lower-snake-case
+        // note: Signup service determines the drip campaign selector based on this value.
         source: string,
         first_name: string,
         last_name: string,
