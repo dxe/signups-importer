@@ -11,6 +11,7 @@ namespace SignupService {
         phone?: string,
         zip?: string,
         country?: string,
+        target_chapter_id?: number,
         donation_type?: string,
         donation_amount?: string,
         donation_date?: string,

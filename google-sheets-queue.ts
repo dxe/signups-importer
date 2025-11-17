@@ -46,8 +46,11 @@ namespace GoogleSheetsSignups {
         }
 
         private createSignupFromCurrentRow() {
-            function maybeSet(obj: {}, prop: string, value: string) {
-                if (value.length > 0) {
+            function maybeSet(obj: {}, prop: string, value: string | number | undefined) {
+                if (
+                    (typeof (value) === 'string' && value.length > 0) ||
+                    typeof (value) === 'number' && !isNaN(value)
+                ) {
                     obj[prop] = value
                 }
             }
@@ -62,6 +65,7 @@ namespace GoogleSheetsSignups {
             maybeSet(signup, "state", this.getField("State"))
             maybeSet(signup, "zip", this.getField("Zip"))
             maybeSet(signup, "country", this.getField("Country"))
+            maybeSet(signup, "target_chapter_id", parseInt(this.getField("Chapter ID")))
             maybeSet(signup, "donation_type", this.getField("Donation Type"))
             maybeSet(signup, "donation_amount", this.getField("Donation Amount"))
             maybeSet(signup, "donation_date", this.getField("Donation Date"))
