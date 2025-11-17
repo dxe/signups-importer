@@ -14,7 +14,7 @@ namespace Chuffed {
       { normalizedName: "Zip", fn: (get) => null /* Set by post-processor */ },
       { normalizedName: ".ZIP/Postal Code", originalName: "ZIP/Postal Code" },
       { normalizedName: "Country", fn: () => null /* Set by post-processor */ },
-      { originalName: "Date (UTC)", normalizedName: "Donation Date" },
+      { normalizedName: "Donation Date", originalName: "Date (UTC)" },
       { normalizedName: ".Raw Donation Amount", originalName: "Donation" },
       { normalizedName: ".Raw Donation Currency", originalName: "Currency" },
       { normalizedName: ".Converted Amount", originalName: "Converted Amount" },
