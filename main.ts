@@ -79,6 +79,12 @@ function StartOrContinueDryRun5() {
 function StartOrContinueDryRun100() {
     (new Main.SignupsImporter()).importActiveSheetDryRun(100)
 }
+function StartOrContinueDryRun1000() {
+    (new Main.SignupsImporter()).importActiveSheetDryRun(1000)
+}
+function StartOrContinueDryRun10000() {
+    (new Main.SignupsImporter()).importActiveSheetDryRun(10000)
+}
 function StartOrContinueImportToSignupService1() {
     (new Main.SignupsImporter()).importActiveSheet(1)
 }
@@ -88,6 +94,9 @@ function StartOrContinueImportToSignupService5() {
 function StartOrContinueImportToSignupService100() {
     (new Main.SignupsImporter()).importActiveSheet(100)
 }
+function StartOrContinueImportToSignupService1000() {
+    (new Main.SignupsImporter()).importActiveSheet(1000)
+}
 function ComputeAndLogSummary() {
     (new Main.SignupsImporter()).computeAndLogSummary()
 }
@@ -95,20 +104,28 @@ function ComputeAndLogSummary() {
 function onOpen() {
     var ui = SpreadsheetApp.getUi();
     const menu = ui.createMenu('Signups Importer')
-        .addItem('Normalize Chuffed list', 'NormalizeChuffedList')
-
         .addSubMenu(
-            ui.createMenu("Dry-run")
-                .addItem('Next 1 item', 'StartOrContinueDryRun1')
-                .addItem('Next 5 items', 'StartOrContinueDryRun5')
-                .addItem('Next 100 items', 'StartOrContinueDryRun100')
+            ui.createMenu("Normalize list")
+                .addItem('Normalize Chuffed list', 'NormalizeChuffedList')
         )
         .addSubMenu(
-            ui.createMenu("Send to Signup Service")
-                .addItem('Next 1 item', 'StartOrContinueImportToSignupService1')
-                .addItem('Next 5 items', 'StartOrContinueImportToSignupService5')
-                .addItem('Next 100 items', 'StartOrContinueImportToSignupService100')
+            ui.createMenu("Import normalized list")
+                .addSubMenu(
+                    ui.createMenu("Dry-run")
+                        .addItem('Next 1 item', 'StartOrContinueDryRun1')
+                        .addItem('Next 5 items', 'StartOrContinueDryRun5')
+                        .addItem('Next 100 items', 'StartOrContinueDryRun100')
+                        .addItem('Next 1000 items', 'StartOrContinueDryRun1000')
+                        .addItem('Next 10000 items', 'StartOrContinueDryRun10000')
+                )
+                .addSubMenu(
+                    ui.createMenu("Send to Signup Service")
+                        .addItem('Next 1 item', 'StartOrContinueImportToSignupService1')
+                        .addItem('Next 5 items', 'StartOrContinueImportToSignupService5')
+                        .addItem('Next 100 items', 'StartOrContinueImportToSignupService100')
+                        .addItem('Next 1000 items', 'StartOrContinueImportToSignupService1000')
+                )
         )
-        .addItem('Compute and log summary', 'ComputeAndLogSummary')
+        .addItem('Compute summary and log', 'ComputeAndLogSummary')
         .addToUi();
 }
