@@ -59,6 +59,7 @@ namespace GoogleSheetsSignups {
                 "email": this.getField("Email"),
             };
             maybeSet(signup, "phone", this.getField("Phone"))
+            maybeSet(signup, "state", this.getField("State"))
             maybeSet(signup, "zip", this.getField("Zip"))
             maybeSet(signup, "country", this.getField("Country"))
             maybeSet(signup, "donation_type", this.getField("Donation Type"))
