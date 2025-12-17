@@ -10,11 +10,14 @@ namespace ListNormalization {
         fn?: ComputedColumnFunction
     };
 
+    // Interface for defining how to normalize a particular type of list into the standard format expected by
+    // GoogleSheetSignupQueue.
     export type ColumnSpecNormalization = {
         getColumnSpec(): ColumnSpec[];
         postprocess?(get: GetterFunc, set: SetterFunc): void;
     }
 
+    // Mechanism to normalize a Google Sheet given a ColumnSpecNormalization.
     export class ColumnSpecNormalizer {
         private readonly orderedColumnSpecs: ColumnSpec[];
 

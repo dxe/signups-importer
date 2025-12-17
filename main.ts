@@ -105,12 +105,15 @@ function onOpen() {
     var ui = SpreadsheetApp.getUi();
     const menu = ui.createMenu('Signups Importer')
         .addSubMenu(
+            // Allow user to normalize a list and review the result before importing to mailing list.
             ui.createMenu("Normalize list")
-                .addItem('Normalize Chuffed list', 'NormalizeChuffedList')
+                .addItem('Normalize Chuffed list', 'NormalizeChuffedList') // normalize lists from Chuffed donation platform
         )
         .addSubMenu(
             ui.createMenu("Import normalized list")
                 .addSubMenu(
+                    // Allow user to test processing of a normalized sheet without actually importing. This is useful
+                    // for development as well as avoiding partially successful imports.
                     ui.createMenu("Dry-run")
                         .addItem('Next 1 item', 'StartOrContinueDryRun1')
                         .addItem('Next 5 items', 'StartOrContinueDryRun5')

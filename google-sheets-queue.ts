@@ -1,4 +1,5 @@
 namespace GoogleSheetsSignups {
+    // Implementation of a queue of signups based on Google Sheets. Retrieves signups and allows recording their status.
     export class GoogleSheetSignupQueue implements SignupsProcessor.SignupQueue {
         private config = Configuration.config;
         private data: unknown[][];
@@ -56,24 +57,24 @@ namespace GoogleSheetsSignups {
             }
 
             const signup: SignupService.Signup = {
-                "source": this.getField("Source"),
-                "first_name": this.getField("First Name"),
-                "last_name": this.getField("Last Name"),
-                "email": this.getField("Email"),
+                "source": this.getFieldValueForCurrentRow("Source"),
+                "first_name": this.getFieldValueForCurrentRow("First Name"),
+                "last_name": this.getFieldValueForCurrentRow("Last Name"),
+                "email": this.getFieldValueForCurrentRow("Email"),
             };
-            maybeSet(signup, "phone", this.getField("Phone"))
-            maybeSet(signup, "state", this.getField("State"))
-            maybeSet(signup, "zip", this.getField("Zip"))
-            maybeSet(signup, "country", this.getField("Country"))
-            maybeSet(signup, "target_chapter_id", parseInt(this.getField("Chapter ID")))
-            maybeSet(signup, "donation_type", this.getField("Donation Type"))
-            maybeSet(signup, "donation_amount", this.getField("Donation Amount"))
-            maybeSet(signup, "donation_date", this.getField("Donation Date"))
+            maybeSet(signup, "phone", this.getFieldValueForCurrentRow("Phone"))
+            maybeSet(signup, "state", this.getFieldValueForCurrentRow("State"))
+            maybeSet(signup, "zip", this.getFieldValueForCurrentRow("Zip"))
+            maybeSet(signup, "country", this.getFieldValueForCurrentRow("Country"))
+            maybeSet(signup, "target_chapter_id", parseInt(this.getFieldValueForCurrentRow("Chapter ID")))
+            maybeSet(signup, "donation_type", this.getFieldValueForCurrentRow("Donation Type"))
+            maybeSet(signup, "donation_amount", this.getFieldValueForCurrentRow("Donation Amount"))
+            maybeSet(signup, "donation_date", this.getFieldValueForCurrentRow("Donation Date"))
 
             return signup;
         }
 
-        private getField(fieldName: string): string | undefined {
+        private getFieldValueForCurrentRow(fieldName: string): string | undefined {
             const index = this.headers.indexOf(fieldName);
             if (index === -1) throw Error(`Column not found: "${fieldName}"`);
             let value = this.data[this.i][index];

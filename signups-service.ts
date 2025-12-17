@@ -22,6 +22,7 @@ namespace SignupService {
         message: string,
     }
 
+    // Sends the given signup to DxE's Signup service.
     export function enqueueSignup(signup: Signup): SignupResponse {
         const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
             method: "post",
