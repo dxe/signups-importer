@@ -11,6 +11,22 @@ namespace GoogleSheetsSignups {
         // Current row index
         private i: number;
 
+        // Centralized field/column names used by this queue
+        private static readonly FIELD_NAMES = {
+            SOURCE: "Source",
+            FIRST_NAME: "First Name",
+            LAST_NAME: "Last Name",
+            EMAIL: "Email",
+            PHONE: "Phone",
+            STATE: "State",
+            ZIP: "Zip",
+            COUNTRY: "Country",
+            CHAPTER_ID: "Chapter ID",
+            DONATION_TYPE: "Donation Type",
+            DONATION_AMOUNT: "Donation Amount",
+            DONATION_DATE: "Donation Date",
+        } as const;
+
         constructor(
             private readonly sheet: GoogleAppsScript.Spreadsheet.Sheet,
             private readonly statusColumnName: string,
@@ -29,6 +45,44 @@ namespace GoogleSheetsSignups {
 
             if (this.timestampColumnIndex !== this.statusColumnIndex + 1) {
                 throw new Error("Timestamp column must be immediately right of status column");
+            }
+
+            this.validateHeaderDataColumns();
+        }
+
+        // Validate header columns for data fields:
+        // * Ensure required fields are present.
+        // * Ensure that each column is a known data field, if not one of the status/timestamp columns, or starts with
+        //   a dot (.) indicating it is safe to ignore.
+        private validateHeaderDataColumns() {
+            // Ensure required fields are present
+            const FIELDS = GoogleSheetSignupQueue.FIELD_NAMES;
+            const required = [FIELDS.EMAIL, FIELDS.SOURCE, FIELDS.FIRST_NAME, FIELDS.LAST_NAME];
+            const missing = required.filter((name) => this.headers.indexOf(name) === -1);
+            if (missing.length > 0) {
+                throw new Error(`Missing required column(s): ${missing.join(', ')}`);
+            }
+
+            // Check fields are recognized or prefixed with dot.
+            const allowedFieldNames = new Set<string>(Object.values(GoogleSheetSignupQueue.FIELD_NAMES));
+            allowedFieldNames.add(Configuration.config.dryRunTimestampColumnName);
+            allowedFieldNames.add(Configuration.config.dryRunStatusColumnName);
+            allowedFieldNames.add(Configuration.config.statusColumnName);
+            allowedFieldNames.add(Configuration.config.timestampColumnName);
+
+            const invalidColumns: string[] = [];
+            for (const h of this.headers) {
+                const header = typeof h === 'string' ? h : String(h);
+                if (header.startsWith('.') ||
+                    header === this.statusColumnName ||
+                    header === this.timestampColumnName ||
+                    allowedFieldNames.has(header)) {
+                    continue;
+                }
+                invalidColumns.push(header);
+            }
+            if (invalidColumns.length > 0) {
+                throw new Error(`Unknown column(s): ${invalidColumns.join(', ')}. Prefix column header with '.' to indicate column is not part of import.`);
             }
         }
 
@@ -56,27 +110,28 @@ namespace GoogleSheetsSignups {
                 }
             }
 
+            const FIELDS = GoogleSheetSignupQueue.FIELD_NAMES;
             const signup: SignupService.Signup = {
-                "source": this.getFieldValueForCurrentRow("Source"),
-                "first_name": this.getFieldValueForCurrentRow("First Name"),
-                "last_name": this.getFieldValueForCurrentRow("Last Name"),
-                "email": this.getFieldValueForCurrentRow("Email"),
+                "source": this.getFieldValueForCurrentRow(FIELDS.SOURCE),
+                "first_name": this.getFieldValueForCurrentRow(FIELDS.FIRST_NAME),
+                "last_name": this.getFieldValueForCurrentRow(FIELDS.LAST_NAME),
+                "email": this.getFieldValueForCurrentRow(FIELDS.EMAIL),
             };
-            maybeSet(signup, "phone", this.getFieldValueForCurrentRow("Phone"))
-            maybeSet(signup, "state", this.getFieldValueForCurrentRow("State"))
-            maybeSet(signup, "zip", this.getFieldValueForCurrentRow("Zip"))
-            maybeSet(signup, "country", this.getFieldValueForCurrentRow("Country"))
-            maybeSet(signup, "target_chapter_id", parseInt(this.getFieldValueForCurrentRow("Chapter ID")))
-            maybeSet(signup, "donation_type", this.getFieldValueForCurrentRow("Donation Type"))
-            maybeSet(signup, "donation_amount", this.getFieldValueForCurrentRow("Donation Amount"))
-            maybeSet(signup, "donation_date", this.getFieldValueForCurrentRow("Donation Date"))
+            maybeSet(signup, "phone", this.getFieldValueForCurrentRow(FIELDS.PHONE))
+            maybeSet(signup, "state", this.getFieldValueForCurrentRow(FIELDS.STATE))
+            maybeSet(signup, "zip", this.getFieldValueForCurrentRow(FIELDS.ZIP))
+            maybeSet(signup, "country", this.getFieldValueForCurrentRow(FIELDS.COUNTRY))
+            maybeSet(signup, "target_chapter_id", parseInt(this.getFieldValueForCurrentRow(FIELDS.CHAPTER_ID)))
+            maybeSet(signup, "donation_type", this.getFieldValueForCurrentRow(FIELDS.DONATION_TYPE))
+            maybeSet(signup, "donation_amount", this.getFieldValueForCurrentRow(FIELDS.DONATION_AMOUNT))
+            maybeSet(signup, "donation_date", this.getFieldValueForCurrentRow(FIELDS.DONATION_DATE))
 
             return signup;
         }
 
         private getFieldValueForCurrentRow(fieldName: string): string | undefined {
             const index = this.headers.indexOf(fieldName);
-            if (index === -1) throw Error(`Column not found: "${fieldName}"`);
+            if (index === -1) return undefined;
             let value = this.data[this.i][index];
             return value.toString();
         }
