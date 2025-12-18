@@ -152,5 +152,19 @@ function onOpen() {
                 .addItem('Dry-run', 'ComputeAndLogSummaryDryRun')
                 .addItem('Prod/live', 'ComputeAndLogSummary')
         )
+        .addSubMenu(
+            ui.createMenu('About')
+                .addItem('Project homepage', 'OpenAboutDialog')
+        )
         .addToUi();
+}
+
+function OpenAboutDialog() {
+    const html = HtmlService.createHtmlOutput(
+        '<div style="font-size:14px;line-height:1.6">' +
+        '<p>Visit the project homepage:</p>' +
+        '<p><a href="https://github.com/dxe/signups-importer" target="_blank">https://github.com/dxe/signups-importer</a></p>' +
+        '</div>'
+    ).setWidth(420).setHeight(140);
+    SpreadsheetApp.getUi().showModalDialog(html, 'About Signups Importer');
 }
