@@ -71,6 +71,14 @@ namespace Main {
                 Configuration.config.timestampColumnName,
             ).computeSummary());
         }
+
+        computeAndLogSummaryDryRun() {
+            console.log(new GoogleSheetsSignups.GoogleSheetSignupQueue(
+                this.getActiveSheet(),
+                Configuration.config.dryRunStatusColumnName,
+                Configuration.config.dryRunTimestampColumnName,
+            ).computeSummary());
+        }
     }
 }
 
@@ -107,6 +115,9 @@ function StartOrContinueImportToSignupService1000() {
 function ComputeAndLogSummary() {
     (new Main.SignupsImporter()).computeAndLogSummary()
 }
+function ComputeAndLogSummaryDryRun() {
+    (new Main.SignupsImporter()).computeAndLogSummaryDryRun()
+}
 
 function onOpen() {
     var ui = SpreadsheetApp.getUi();
@@ -136,6 +147,10 @@ function onOpen() {
                         .addItem('Next 1000 items', 'StartOrContinueImportToSignupService1000')
                 )
         )
-        .addItem('Compute summary and log', 'ComputeAndLogSummary')
+        .addSubMenu(
+            ui.createMenu('Compute summary and log')
+                .addItem('Dry-run', 'ComputeAndLogSummaryDryRun')
+                .addItem('Prod/live', 'ComputeAndLogSummary')
+        )
         .addToUi();
 }
