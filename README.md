@@ -17,14 +17,14 @@ Here is the workflow:
 
 1. Import data into sheet
 2. Normalize data by either:
-   - Using normalization code (reusing or adding new list types in the list-formats directory), or
+   - Using normalization code (using existing functionality under `Normalize list` or adding new list types in the
+     list-formats directory), or
    - Manually renaming columns and correcting data issues
-3. Run the dry run. Run from Apps Script editor to preview the signup request payloads. You may see validation warnings
-   for some structurally invalid emails.
-4. If there are too many results to easily see on the screen, run "ComputeAndLogSummaryDryRun" from Apps Script editor
-   to see if there are any issues.
-4. Import data for real by selecting from the menu.
-5. Again if there are too many results to easily see, run "ComputeAndLogSummary" from Apps Script editor.
+3. Perform a dry-run with `Import normalized list` -> `Dry-run`. You may see validation warnings in the status column
+   for some structurally invalid emails. Run from Apps Script editor to preview the signup request payloads. 
+4. If there are too many results to easily see on the screen, `Compute summary` -> `For dry-run`.
+4. Import data for real with `Import normalized list` -> `Send to Signup service`.
+5. Again if there are too many results to easily see, `Compute summary` -> `For prod/live`.
 
 ## Development
 

@@ -64,22 +64,39 @@ namespace Main {
             return `${Configuration.config.statusPrefixes.ok} logged`;
         }
 
-        computeAndLogSummary() {
-            console.log(new GoogleSheetsSignups.GoogleSheetSignupQueue(
+        showSummaryForProdLive() {
+            const summary = new GoogleSheetsSignups.GoogleSheetSignupQueue(
                 this.getActiveSheet(),
                 Configuration.config.statusColumnName,
                 Configuration.config.timestampColumnName,
-            ).computeSummary());
+            ).computeSummary();
+            ShowHtmlDialog('Summary (Prod/live)', `<p>${summary}</p>`);
         }
 
-        computeAndLogSummaryDryRun() {
-            console.log(new GoogleSheetsSignups.GoogleSheetSignupQueue(
+        showSummaryDryRun() {
+            const summary = new GoogleSheetsSignups.GoogleSheetSignupQueue(
                 this.getActiveSheet(),
                 Configuration.config.dryRunStatusColumnName,
                 Configuration.config.dryRunTimestampColumnName,
-            ).computeSummary());
+            ).computeSummary();
+            ShowHtmlDialog('Summary (Dry-run)', `<p>${summary}</p>`);
         }
     }
+}
+
+function OpenAboutDialog() {
+    ShowHtmlDialog(
+        'About Signups Importer',
+        '<p>Visit the project homepage:</p>' +
+        '<p><a href="https://github.com/dxe/signups-importer" target="_blank">https://github.com/dxe/signups-importer</a></p>'
+    );
+}
+
+function ShowHtmlDialog(title: string, innerHtml: string) {
+    const html = HtmlService.createHtmlOutput(
+        '<div style="font-size:14px;line-height:1.6">' + innerHtml + '</div>'
+    ).setWidth(420).setHeight(160);
+    SpreadsheetApp.getUi().showModalDialog(html, title);
 }
 
 function NormalizeChuffedList() {
@@ -112,11 +129,11 @@ function StartOrContinueImportToSignupService100() {
 function StartOrContinueImportToSignupService1000() {
     (new Main.SignupsImporter()).importActiveSheet(1000)
 }
-function ComputeAndLogSummary() {
-    (new Main.SignupsImporter()).computeAndLogSummary()
+function ShowSummaryForProdLive() {
+    (new Main.SignupsImporter()).showSummaryForProdLive()
 }
-function ComputeAndLogSummaryDryRun() {
-    (new Main.SignupsImporter()).computeAndLogSummaryDryRun()
+function ShowSummaryForDryRun() {
+    (new Main.SignupsImporter()).showSummaryDryRun()
 }
 
 function onOpen() {
@@ -140,7 +157,7 @@ function onOpen() {
                         .addItem('Next 10000 items', 'StartOrContinueDryRun10000')
                 )
                 .addSubMenu(
-                    ui.createMenu("Send to Signup Service")
+                    ui.createMenu("Send to Signup service")
                         .addItem('Next 1 item', 'StartOrContinueImportToSignupService1')
                         .addItem('Next 5 items', 'StartOrContinueImportToSignupService5')
                         .addItem('Next 100 items', 'StartOrContinueImportToSignupService100')
@@ -148,23 +165,13 @@ function onOpen() {
                 )
         )
         .addSubMenu(
-            ui.createMenu('Compute summary and log')
-                .addItem('Dry-run', 'ComputeAndLogSummaryDryRun')
-                .addItem('Prod/live', 'ComputeAndLogSummary')
+            ui.createMenu('Compute summary')
+                .addItem('For dry-run', 'ShowSummaryForDryRun')
+                .addItem('For prod/live', 'ShowSummaryForProdLive')
         )
         .addSubMenu(
             ui.createMenu('About')
                 .addItem('Project homepage', 'OpenAboutDialog')
         )
         .addToUi();
-}
-
-function OpenAboutDialog() {
-    const html = HtmlService.createHtmlOutput(
-        '<div style="font-size:14px;line-height:1.6">' +
-        '<p>Visit the project homepage:</p>' +
-        '<p><a href="https://github.com/dxe/signups-importer" target="_blank">https://github.com/dxe/signups-importer</a></p>' +
-        '</div>'
-    ).setWidth(420).setHeight(140);
-    SpreadsheetApp.getUi().showModalDialog(html, 'About Signups Importer');
 }
