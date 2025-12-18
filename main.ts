@@ -22,7 +22,7 @@ namespace Main {
         private signupHandler(signup: SignupService.Signup) {
             const response = SignupService.enqueueSignup(signup)
             if (response.code === 200) {
-                return `${Configuration.config.rowStatusOkPrefix} ${response.message}`
+                return `${Configuration.config.statusPrefixes.ok} ${response.message}`
             } else {
                 return `Code: ${response.code}; msg: ${response.message}`
             }
@@ -47,14 +47,21 @@ namespace Main {
                     Configuration.config.dryRunStatusColumnName,
                     Configuration.config.dryRunTimestampColumnName,
                 ),
-                this.logHandler,
+                this.validateAndLogHandler,
                 limit,
             )
         }
 
-        private logHandler(signup: SignupService.Signup) {
-            console.log(signup)
-            return `${Configuration.config.rowStatusOkPrefix} logged`
+        private validateAndLogHandler(signup: SignupService.Signup) {
+            const result = SignupValidation.validateDryRun(signup);
+            if (result.level === 'error' && result.message) {
+                return `${Configuration.config.statusPrefixes.error} ${result.message}`;
+            }
+            if (result.level === 'warn' && result.message) {
+                return `${Configuration.config.statusPrefixes.warn} ${result.message}`;
+            }
+            console.log(signup);
+            return `${Configuration.config.statusPrefixes.ok} logged`;
         }
 
         computeAndLogSummary() {

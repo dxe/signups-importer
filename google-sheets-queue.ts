@@ -139,13 +139,16 @@ namespace GoogleSheetsSignups {
         public computeSummary(): string {
             let blank = 0;
             let ok = 0;
+            let warn = 0;
             let error = 0;
 
             const lastRow = this.sheet.getLastRow();
             for (this.i = 1; this.i < lastRow; this.i++) {
                 const value = this.data[this.i][this.statusColumnIndex];
-                if (typeof (value) === 'string' && value.startsWith(this.config.rowStatusOkPrefix)) {
+                if (typeof (value) === 'string' && value.startsWith(this.config.statusPrefixes.ok)) {
                     ok++;
+                } else if (typeof (value) === 'string' && value.startsWith(this.config.statusPrefixes.warn)) {
+                    warn++;
                 } else if (value === null) {
                     blank++
                 } else if (value.toString().length > 0) {
@@ -155,7 +158,7 @@ namespace GoogleSheetsSignups {
                 }
             }
 
-            return `ok: ${ok}; error: ${error}; not processed: ${blank}`;
+            return `ok: ${ok}; warn: ${warn}; error: ${error}; not processed: ${blank}`;
         }
     }
 }
