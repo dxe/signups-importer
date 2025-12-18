@@ -2,6 +2,30 @@
 
 Project to import signups / emails in Google Sheets into DxE Signup service using Google Apps Script.
 
+## Usage
+
+The standard workflow for importing emails with this Apps Script project involves manually calling functions in a
+particular order.
+
+The functions can be called either from the "Signups Importer" menu in Google Sheets UI, or in Google Apps Script
+editor. Only the latter will show you details printed to the console.
+
+To use the Apps Script editor, click Extentions -> Apps Script, open `main.go`, select the desired function from the
+dropdown and click the "Debug" button. The logs will appear at the bottom of the screen.
+
+Here is the workflow:
+
+1. Import data into sheet
+2. Normalize data by either:
+   - Using normalization code (reusing or adding new list types in the list-formats directory), or
+   - Manually renaming columns and correcting data issues
+3. Run the dry run. Run from Apps Script editor to preview the signup request payloads. You may see validation warnings
+   for some structurally invalid emails.
+4. If there are too many results to easily see on the screen, run "ComputeAndLogSummaryDryRun" from Apps Script editor
+   to see if there are any issues.
+4. Import data for real by selecting from the menu.
+5. Again if there are too many results to easily see, run "ComputeAndLogSummary" from Apps Script editor.
+
 ## Development
 
 This project uses namespaces instead of module imports due to a limitation of Clasp:
