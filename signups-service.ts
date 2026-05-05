@@ -5,8 +5,9 @@ namespace SignupService {
         // sources should be lower-snake-case
         // note: Signup service determines the drip campaign selector based on this value.
         source: string,
-        first_name: string,
-        last_name: string,
+        name?: string,
+        first_name?: string,
+        last_name?: string,
         email: string,
         phone?: string,
         zip?: string,

@@ -14,6 +14,7 @@ namespace GoogleSheetsSignups {
         // Centralized field/column names used by this queue
         private static readonly FIELD_NAMES = {
             SOURCE: "Source",
+            FULL_NAME: "Full Name",
             FIRST_NAME: "First Name",
             LAST_NAME: "Last Name",
             EMAIL: "Email",
@@ -57,10 +58,20 @@ namespace GoogleSheetsSignups {
         private validateHeaderDataColumns() {
             // Ensure required fields are present
             const FIELDS = GoogleSheetSignupQueue.FIELD_NAMES;
-            const required = [FIELDS.EMAIL, FIELDS.SOURCE, FIELDS.FIRST_NAME, FIELDS.LAST_NAME];
+            const required = [FIELDS.EMAIL, FIELDS.SOURCE];
             const missing = required.filter((name) => this.headers.indexOf(name) === -1);
             if (missing.length > 0) {
                 throw new Error(`Missing required column(s): ${missing.join(', ')}`);
+            }
+
+            const hasFullName = this.headers.indexOf(FIELDS.FULL_NAME) !== -1;
+            const hasFirstName = this.headers.indexOf(FIELDS.FIRST_NAME) !== -1;
+            const hasLastName = this.headers.indexOf(FIELDS.LAST_NAME) !== -1;
+            if (hasFullName && (hasFirstName || hasLastName)) {
+                throw new Error(`"${FIELDS.FULL_NAME}" column cannot be used together with "${FIELDS.FIRST_NAME}" or "${FIELDS.LAST_NAME}" columns`);
+            }
+            if (!hasFullName && !hasFirstName && !hasLastName) {
+                throw new Error(`Must have at least one name column: "${FIELDS.FULL_NAME}", "${FIELDS.FIRST_NAME}", or "${FIELDS.LAST_NAME}"`);
             }
 
             // Check fields are recognized or prefixed with dot.
@@ -113,10 +124,14 @@ namespace GoogleSheetsSignups {
             const FIELDS = GoogleSheetSignupQueue.FIELD_NAMES;
             const signup: SignupService.Signup = {
                 "source": this.getFieldValueForCurrentRow(FIELDS.SOURCE),
-                "first_name": this.getFieldValueForCurrentRow(FIELDS.FIRST_NAME),
-                "last_name": this.getFieldValueForCurrentRow(FIELDS.LAST_NAME),
                 "email": this.getFieldValueForCurrentRow(FIELDS.EMAIL),
             };
+            if (this.headers.indexOf(FIELDS.FULL_NAME) !== -1) {
+                maybeSet(signup, "name", this.getFieldValueForCurrentRow(FIELDS.FULL_NAME));
+            } else {
+                maybeSet(signup, "first_name", this.getFieldValueForCurrentRow(FIELDS.FIRST_NAME));
+                maybeSet(signup, "last_name", this.getFieldValueForCurrentRow(FIELDS.LAST_NAME));
+            }
             maybeSet(signup, "phone", this.getFieldValueForCurrentRow(FIELDS.PHONE))
             maybeSet(signup, "state", this.getFieldValueForCurrentRow(FIELDS.STATE))
             maybeSet(signup, "zip", this.getFieldValueForCurrentRow(FIELDS.ZIP))
