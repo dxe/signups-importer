@@ -94,6 +94,7 @@ namespace Main {
                 FIELDS.FIRST_NAME,
                 FIELDS.LAST_NAME,
                 FIELDS.EMAIL,
+                FIELDS.DRIP_SELECTOR,
             ];
             const sheet = this.getActiveSheet();
             sheet.insertColumnsBefore(1, headers.length);

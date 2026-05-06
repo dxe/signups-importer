@@ -59,7 +59,7 @@ namespace GoogleSheetsSignups {
         private validateHeaderDataColumns() {
             // Ensure required fields are present
             const FIELDS = GoogleSheetSignupQueue.FIELD_NAMES;
-            const required = [FIELDS.EMAIL, FIELDS.SOURCE];
+            const required = [FIELDS.EMAIL, FIELDS.SOURCE, FIELDS.DRIP_SELECTOR];
             const missing = required.filter((name) => this.headers.indexOf(name) === -1);
             if (missing.length > 0) {
                 throw new Error(`Missing required column(s): ${missing.join(', ')}`);
@@ -147,12 +147,13 @@ namespace GoogleSheetsSignups {
             maybeSet(signup, "donation_amount", this.getFieldValueForCurrentRow(FIELDS.DONATION_AMOUNT))
             maybeSet(signup, "donation_date", this.getFieldValueForCurrentRow(FIELDS.DONATION_DATE))
 
-            const dripSelector = this.getFieldValueForCurrentRow(FIELDS.DRIP_SELECTOR);
-            maybeSet(signup, "drip_selector", dripSelector);
-            if (this.headers.indexOf(FIELDS.DRIP_SELECTOR) !== -1) {
-                if (!dripSelector || dripSelector.trim() === '') {
-                    throw new Error(`"${FIELDS.DRIP_SELECTOR}" column is present but value is blank. Use "NONE" to prevent drip selector.`);
-                }
+            const dripSelector = this.getFieldValueForCurrentRow(FIELDS.DRIP_SELECTOR)!;
+            if (dripSelector.trim() === '') {
+                throw new Error(`"${FIELDS.DRIP_SELECTOR}" value is blank. Use "NONE" to omit drip selector or "DEFAULT" to send a blank drip selector.`);
+            } else if (dripSelector.trim() === 'DEFAULT') {
+                signup.drip_selector = '';
+            } else if (dripSelector.trim() !== 'NONE') {
+                signup.drip_selector = dripSelector;
             }
 
 
