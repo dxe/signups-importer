@@ -59,7 +59,7 @@ namespace ListNormalization {
             for (let r = 1; r < lastRow; r++) {
                 const row = new Array<unknown>(desiredLen);
                 const oldRow = values[r];
-                const getterFunc = name => ColumnSpecNormalizer.getValue(name, oldRow, headerIndexes)
+                const getterFunc = (name: string) => ColumnSpecNormalizer.getValue(name, oldRow, headerIndexes)
                 for (let c = 0; c < desiredLen; c++) {
                     const columnSpec = this.orderedColumnSpecs[c];
                     let newCellValue;
@@ -71,6 +71,9 @@ namespace ListNormalization {
                         }
                         newCellValue = oldRow[srcIdx]
                     } else {
+                        if (columnSpec.fn === undefined) {
+                            throw new Error("missing column original name or computed column function");
+                        }
                         newCellValue = columnSpec.fn(getterFunc)
                     }
                     row[c] = newCellValue

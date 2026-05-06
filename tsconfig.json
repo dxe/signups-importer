@@ -7,6 +7,7 @@
     ],
     "compilerOptions": {
         // Not actually sure what version most closely resembles what Apps Script V8 runtime runs on.
-        "target": "es6",
+        "target": "ES2019",
+        "types": ["google-apps-script"]
     }
 }

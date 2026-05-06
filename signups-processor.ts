@@ -4,7 +4,7 @@ namespace SignupsProcessor {
     // Interface for a queue of signups that allows retrieving items in the queue and updating their status.
     export type SignupQueue = {
         getUnprocessedSignups(): Generator<SignupService.Signup>
-        recordStatus(status: string)
+        recordStatus(status: string): void
     }
 
     // Processes a limited range of signups using the provided processing handler function.

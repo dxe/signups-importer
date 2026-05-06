@@ -2,14 +2,14 @@ namespace GoogleSheetsSignups {
     // Implementation of a queue of signups based on Google Sheets. Retrieves signups and allows recording their status.
     export class GoogleSheetSignupQueue implements SignupsProcessor.SignupQueue {
         private config = Configuration.config;
-        private data: unknown[][];
+        private data: any[][];
         private headers: unknown[];
 
         private statusColumnIndex: number;
         private timestampColumnIndex: number;
 
         // Current row index
-        private i: number;
+        private i: number = -1;
 
         // Centralized field/column names used by this queue
         public static readonly FIELD_NAMES = {
@@ -113,7 +113,7 @@ namespace GoogleSheetsSignups {
         }
 
         private createSignupFromCurrentRow() {
-            function maybeSet(obj: {}, prop: string, value: string | number | undefined) {
+            function maybeSet(obj: Record<string, any>, prop: string, value: string | number | undefined) {
                 if (
                     (typeof (value) === 'string' && value.length > 0) ||
                     typeof (value) === 'number' && !isNaN(value)
@@ -122,10 +122,15 @@ namespace GoogleSheetsSignups {
                 }
             }
 
+            function parseIntOrUndefined(value: string | undefined): number | undefined {
+                if (value === undefined || value === '') return undefined;
+                return parseInt(value);
+            }
+
             const FIELDS = GoogleSheetSignupQueue.FIELD_NAMES;
             const signup: SignupService.Signup = {
-                "source": this.getFieldValueForCurrentRow(FIELDS.SOURCE),
-                "email": this.getFieldValueForCurrentRow(FIELDS.EMAIL),
+                "source": this.getFieldValueForCurrentRow(FIELDS.SOURCE)!,
+                "email": this.getFieldValueForCurrentRow(FIELDS.EMAIL)!,
             };
             if (this.headers.indexOf(FIELDS.FULL_NAME) !== -1) {
                 maybeSet(signup, "name", this.getFieldValueForCurrentRow(FIELDS.FULL_NAME));
@@ -137,7 +142,7 @@ namespace GoogleSheetsSignups {
             maybeSet(signup, "state", this.getFieldValueForCurrentRow(FIELDS.STATE))
             maybeSet(signup, "zip", this.getFieldValueForCurrentRow(FIELDS.ZIP))
             maybeSet(signup, "country", this.getFieldValueForCurrentRow(FIELDS.COUNTRY))
-            maybeSet(signup, "target_chapter_id", parseInt(this.getFieldValueForCurrentRow(FIELDS.CHAPTER_ID)))
+            maybeSet(signup, "target_chapter_id", parseIntOrUndefined(this.getFieldValueForCurrentRow(FIELDS.CHAPTER_ID)))
             maybeSet(signup, "donation_type", this.getFieldValueForCurrentRow(FIELDS.DONATION_TYPE))
             maybeSet(signup, "donation_amount", this.getFieldValueForCurrentRow(FIELDS.DONATION_AMOUNT))
             maybeSet(signup, "donation_date", this.getFieldValueForCurrentRow(FIELDS.DONATION_DATE))
