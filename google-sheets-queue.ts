@@ -26,6 +26,7 @@ namespace GoogleSheetsSignups {
             DONATION_TYPE: "Donation Type",
             DONATION_AMOUNT: "Donation Amount",
             DONATION_DATE: "Donation Date",
+            DRIP_SELECTOR: "Drip Selector",
         } as const;
 
         constructor(
@@ -140,6 +141,15 @@ namespace GoogleSheetsSignups {
             maybeSet(signup, "donation_type", this.getFieldValueForCurrentRow(FIELDS.DONATION_TYPE))
             maybeSet(signup, "donation_amount", this.getFieldValueForCurrentRow(FIELDS.DONATION_AMOUNT))
             maybeSet(signup, "donation_date", this.getFieldValueForCurrentRow(FIELDS.DONATION_DATE))
+
+            const dripSelector = this.getFieldValueForCurrentRow(FIELDS.DRIP_SELECTOR);
+            maybeSet(signup, "drip_selector", dripSelector);
+            if (this.headers.indexOf(FIELDS.DRIP_SELECTOR) !== -1) {
+                if (!dripSelector || dripSelector.trim() === '') {
+                    throw new Error(`"${FIELDS.DRIP_SELECTOR}" column is present but value is blank. Use "NONE" to prevent drip selector.`);
+                }
+            }
+
 
             return signup;
         }

@@ -16,6 +16,7 @@ namespace SignupService {
         donation_type?: string,
         donation_amount?: string,
         donation_date?: string,
+        drip_selector?: string,
     };
 
     export type SignupResponse = {
