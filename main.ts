@@ -84,6 +84,16 @@ namespace Main {
     }
 }
 
+function ShowColumnNamesDialog() {
+    const names = Object.values(GoogleSheetsSignups.GoogleSheetSignupQueue.FIELD_NAMES);
+    const items = names.map(n => `<li>${n}</li>`).join('');
+    ShowHtmlDialog(
+        'Available Column Names',
+        `<p>The following column names are recognized:</p><ul style="margin:4px 0 0 16px;padding:0">${items}</ul>` +
+        '<p style="margin-top:8px;font-size:12px;color:#555">Columns not in this list must be prefixed with <code>.</code> to be ignored.</p>'
+    );
+}
+
 function OpenAboutDialog() {
     ShowHtmlDialog(
         'About Signups Importer',
@@ -172,6 +182,7 @@ function onOpen() {
         .addSubMenu(
             ui.createMenu('About')
                 .addItem('Project homepage', 'OpenAboutDialog')
+                .addItem('Available column names', 'ShowColumnNamesDialog')
         )
         .addToUi();
 }

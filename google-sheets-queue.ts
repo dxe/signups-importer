@@ -12,7 +12,7 @@ namespace GoogleSheetsSignups {
         private i: number;
 
         // Centralized field/column names used by this queue
-        private static readonly FIELD_NAMES = {
+        public static readonly FIELD_NAMES = {
             SOURCE: "Source",
             FULL_NAME: "Full Name",
             FIRST_NAME: "First Name",
