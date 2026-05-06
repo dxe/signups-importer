@@ -81,6 +81,24 @@ namespace Main {
             ).computeSummary();
             ShowHtmlDialog('Summary (Dry-run)', `<p>${summary}</p>`);
         }
+
+        createColumnsInCurrentSheet() {
+            const FIELDS = GoogleSheetsSignups.GoogleSheetSignupQueue.FIELD_NAMES;
+            const cfg = Configuration.config;
+            const headers = [
+                cfg.dryRunStatusColumnName,
+                cfg.dryRunTimestampColumnName,
+                cfg.statusColumnName,
+                cfg.timestampColumnName,
+                FIELDS.SOURCE,
+                FIELDS.FIRST_NAME,
+                FIELDS.LAST_NAME,
+                FIELDS.EMAIL,
+            ];
+            const sheet = this.getActiveSheet();
+            sheet.insertColumnsBefore(1, headers.length);
+            sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+        }
     }
 }
 
@@ -145,6 +163,9 @@ function ShowSummaryForProdLive() {
 function ShowSummaryForDryRun() {
     (new Main.SignupsImporter()).showSummaryDryRun()
 }
+function CreateColumnsInCurrentSheet() {
+    (new Main.SignupsImporter()).createColumnsInCurrentSheet()
+}
 
 function onOpen() {
     var ui = SpreadsheetApp.getUi();
@@ -184,5 +205,6 @@ function onOpen() {
                 .addItem('Project homepage', 'OpenAboutDialog')
                 .addItem('Available column names', 'ShowColumnNamesDialog')
         )
+        .addItem('Create columns in current sheet', 'CreateColumnsInCurrentSheet')
         .addToUi();
 }
