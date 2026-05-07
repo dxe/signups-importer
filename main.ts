@@ -177,24 +177,21 @@ function onOpen() {
                 .addItem('Normalize Chuffed list', 'NormalizeChuffedList') // normalize lists from Chuffed donation platform
         )
         .addSubMenu(
-            ui.createMenu("Import normalized list")
-                .addSubMenu(
-                    // Allow user to test processing of a normalized sheet without actually importing. This is useful
-                    // for development as well as avoiding partially successful imports.
-                    ui.createMenu("Dry-run")
-                        .addItem('Next 1 item', 'StartOrContinueDryRun1')
-                        .addItem('Next 5 items', 'StartOrContinueDryRun5')
-                        .addItem('Next 100 items', 'StartOrContinueDryRun100')
-                        .addItem('Next 1000 items', 'StartOrContinueDryRun1000')
-                        .addItem('Next 10000 items', 'StartOrContinueDryRun10000')
-                )
-                .addSubMenu(
-                    ui.createMenu("Send to Signup service")
-                        .addItem('Next 1 item', 'StartOrContinueImportToSignupService1')
-                        .addItem('Next 5 items', 'StartOrContinueImportToSignupService5')
-                        .addItem('Next 100 items', 'StartOrContinueImportToSignupService100')
-                        .addItem('Next 1000 items', 'StartOrContinueImportToSignupService1000')
-                )
+            // Allow user to test processing of a normalized sheet without actually importing. This is useful
+            // for development as well as avoiding partially successful imports.
+            ui.createMenu("Dry-run")
+                .addItem('Next 1 item', 'StartOrContinueDryRun1')
+                .addItem('Next 5 items', 'StartOrContinueDryRun5')
+                .addItem('Next 100 items', 'StartOrContinueDryRun100')
+                .addItem('Next 1000 items', 'StartOrContinueDryRun1000')
+                .addItem('Next 10000 items', 'StartOrContinueDryRun10000')
+        )
+        .addSubMenu(
+            ui.createMenu("Send to Signup service")
+                .addItem('Next 1 item', 'StartOrContinueImportToSignupService1')
+                .addItem('Next 5 items', 'StartOrContinueImportToSignupService5')
+                .addItem('Next 100 items', 'StartOrContinueImportToSignupService100')
+                .addItem('Next 1000 items', 'StartOrContinueImportToSignupService1000')
         )
         .addSubMenu(
             ui.createMenu('Compute summary')
