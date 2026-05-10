@@ -98,18 +98,30 @@ namespace GoogleSheetsSignups {
             }
         }
 
-        *getUnprocessedSignups(): Generator<SignupService.Signup> {
+        *getUnprocessedSignups(): Generator<{ signup: SignupService.Signup, rowIndex: number }> {
             for (this.i = 1; this.i < this.data.length; this.i++) {
                 if (this.data[this.i][this.statusColumnIndex] !== '') {
                     // Skip already-processed row.
                     continue;
                 }
-                yield this.createSignupFromCurrentRow();
+                yield { signup: this.createSignupFromCurrentRow(), rowIndex: this.i };
             }
         }
 
-        recordStatus(status: string) {
-            this.sheet.getRange(this.i + 1, this.statusColumnIndex + 1, 1, 2).setValues([[status, new Date().toISOString()]]);
+        recordStatuses(results: Array<{ rowIndex: number, status: string }>) {
+            const timestamp = new Date().toISOString();
+            const sorted = [...results].sort((a, b) => a.rowIndex - b.rowIndex);
+            let i = 0;
+            while (i < sorted.length) {
+                let j = i;
+                while (j + 1 < sorted.length && sorted[j + 1].rowIndex === sorted[j].rowIndex + 1) {
+                    j++;
+                }
+                const values = sorted.slice(i, j + 1).map(r => [r.status, timestamp]);
+                const startSheetRow = sorted[i].rowIndex + 1; // 1-indexed
+                this.sheet.getRange(startSheetRow, this.statusColumnIndex + 1, values.length, 2).setValues(values);
+                i = j + 1;
+            }
         }
 
         private createSignupFromCurrentRow() {

@@ -24,20 +24,23 @@ namespace SignupService {
         message: string,
     }
 
-    // Sends the given signup to DxE's Signup service.
-    export function enqueueSignup(signup: Signup): SignupResponse {
-        const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
-            method: "post",
+    // Sends the given signups to DxE's Signup service in parallel using fetchAll.
+    export function enqueueSignups(signups: Signup[]): SignupResponse[] {
+        const requests = signups.map(signup => ({
+            url: Secrets.signupService.enqueueUrl,
+            method: "post" as GoogleAppsScript.URL_Fetch.HttpMethod,
             headers: {
                 "X-api-key": Secrets.signupService.apiKey,
                 "Content-Type": "application/json"
             },
-            payload: JSON.stringify(signup)
-        };
-        const response = UrlFetchApp.fetch(Secrets.signupService.enqueueUrl, options);
-        return {
-            code: response.getResponseCode(),
-            message: response.getContentText()
-        }
+            payload: JSON.stringify(signup),
+            // muteHttpExceptions: true ensures non-2xx responses come back as results rather than thrown errors.
+            muteHttpExceptions: true,
+        }));
+        const responses = UrlFetchApp.fetchAll(requests);
+        return responses.map(r => ({
+            code: r.getResponseCode(),
+            message: r.getContentText(),
+        }));
     }
 }

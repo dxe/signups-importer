@@ -19,13 +19,14 @@ namespace Main {
             return normalizer.normalize();
         }
 
-        private signupHandler(signup: SignupService.Signup) {
-            const response = SignupService.enqueueSignup(signup)
-            if (response.code === 200) {
-                return `${Configuration.config.statusPrefixes.ok} ${response.message}`
-            } else {
-                return `Code: ${response.code}; msg: ${response.message}`
-            }
+        private signupBatchHandler(signups: SignupService.Signup[]): string[] {
+            const responses = SignupService.enqueueSignups(signups);
+            return responses.map(response => {
+                if (response.code === 200) {
+                    return `${Configuration.config.statusPrefixes.ok} ${response.message}`;
+                }
+                return `Code: ${response.code}; msg: ${response.message}`;
+            });
         }
 
         importActiveSheet(limit: number) {
@@ -35,7 +36,7 @@ namespace Main {
                     Configuration.config.statusColumnName,
                     Configuration.config.timestampColumnName,
                 ),
-                this.signupHandler,
+                this.signupBatchHandler,
                 limit,
             )
         }
@@ -47,21 +48,23 @@ namespace Main {
                     Configuration.config.dryRunStatusColumnName,
                     Configuration.config.dryRunTimestampColumnName,
                 ),
-                this.validateAndLogHandler,
+                this.validateAndLogBatchHandler,
                 limit,
             )
         }
 
-        private validateAndLogHandler(signup: SignupService.Signup) {
-            const result = SignupValidation.validateDryRun(signup);
-            if (result.level === 'error' && result.message) {
-                return `${Configuration.config.statusPrefixes.error} ${result.message}`;
-            }
-            if (result.level === 'warn' && result.message) {
-                return `${Configuration.config.statusPrefixes.warn} ${result.message}`;
-            }
-            console.log(signup);
-            return `${Configuration.config.statusPrefixes.ok} logged`;
+        private validateAndLogBatchHandler(signups: SignupService.Signup[]): string[] {
+            return signups.map(signup => {
+                const result = SignupValidation.validateDryRun(signup);
+                if (result.level === 'error' && result.message) {
+                    return `${Configuration.config.statusPrefixes.error} ${result.message}`;
+                }
+                if (result.level === 'warn' && result.message) {
+                    return `${Configuration.config.statusPrefixes.warn} ${result.message}`;
+                }
+                console.log(signup);
+                return `${Configuration.config.statusPrefixes.ok} logged`;
+            });
         }
 
         showSummaryForProdLive() {
