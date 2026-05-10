@@ -85,6 +85,15 @@ namespace Main {
             ShowHtmlDialog('Summary (Dry-run)', `<p>${summary}</p>`);
         }
 
+        splitFullNameColumn() {
+            const sheet = this.getActiveSheet();
+            try {
+                SheetMutations.splitFullNameColumn(sheet);
+            } catch (e) {
+                SpreadsheetApp.getUi().alert((e as Error).message);
+            }
+        }
+
         checkEmails() {
             const result = SignupValidation.findInvalidEmails(this.getActiveSheet());
             if ('error' in result) {
@@ -156,6 +165,9 @@ function ShowHtmlDialog(title: string, innerHtml: string, height = 160) {
 function NormalizeChuffedList() {
     (new Main.SignupsImporter()).normalizeChuffed()
 }
+function SplitFullNameColumn() {
+    (new Main.SignupsImporter()).splitFullNameColumn()
+}
 function StartOrContinueDryRun1() {
     (new Main.SignupsImporter()).importActiveSheetDryRun(1)
 }
@@ -206,6 +218,7 @@ function onOpen() {
             // Allow user to normalize a list and review the result before importing to mailing list.
             ui.createMenu("Normalize list")
                 .addItem('Normalize Chuffed list', 'NormalizeChuffedList') // normalize lists from Chuffed donation platform
+                .addItem('Split "Full Name" column', 'SplitFullNameColumn')
         )
         .addSubMenu(
             ui.createMenu('Validate')
