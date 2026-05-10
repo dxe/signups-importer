@@ -183,6 +183,9 @@ function StartOrContinueImportToSignupService100() {
 function StartOrContinueImportToSignupService1000() {
     (new Main.SignupsImporter()).importActiveSheet(1000)
 }
+function StartOrContinueImportToSignupService5000() {
+    (new Main.SignupsImporter()).importActiveSheet(5000)
+}
 function ShowSummaryForProdLive() {
     (new Main.SignupsImporter()).showSummaryForProdLive()
 }
@@ -224,6 +227,7 @@ function onOpen() {
                 .addItem('Next 5 items', 'StartOrContinueImportToSignupService5')
                 .addItem('Next 100 items', 'StartOrContinueImportToSignupService100')
                 .addItem('Next 1000 items', 'StartOrContinueImportToSignupService1000')
+                .addItem('Next 5000 items', 'StartOrContinueImportToSignupService5000')
         )
         .addSubMenu(
             ui.createMenu('Compute summary')

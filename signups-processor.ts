@@ -8,6 +8,7 @@ namespace SignupsProcessor {
     }
 
     const BATCH_SIZE = 20;
+    const FLUSH_INTERVAL = 500;
 
     // Processes a limited range of signups using the provided processing handler function.
     // The limit is useful to avoid execution timeouts in Google Apps Script.
@@ -17,6 +18,7 @@ namespace SignupsProcessor {
         limit: number
     ) {
         let count = 0;
+        let lastFlushed = 0;
         const gen = queue.getUnprocessedSignups();
 
         while (count < limit) {
@@ -44,6 +46,11 @@ namespace SignupsProcessor {
             })));
 
             count += batch.length;
+
+            if (count - lastFlushed >= FLUSH_INTERVAL) {
+                SpreadsheetApp.flush();
+                lastFlushed = count;
+            }
         }
     }
 }
