@@ -82,6 +82,28 @@ namespace Main {
             ShowHtmlDialog('Summary (Dry-run)', `<p>${summary}</p>`);
         }
 
+        checkEmails() {
+            const result = SignupValidation.findInvalidEmails(this.getActiveSheet());
+            if ('error' in result) {
+                SpreadsheetApp.getUi().alert(result.error);
+                return;
+            }
+            const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            let innerHtml: string;
+            if (result.length === 0) {
+                innerHtml = '<p>All emails are valid!</p>';
+            } else {
+                const limitNote = result.length >= 1000
+                    ? '<p style="color:#888;font-size:12px">Showing first 1000 invalid emails.</p>'
+                    : `<p>${result.length} invalid email${result.length === 1 ? '' : 's'} found:</p>`;
+                const items = result.map(({ row, email }) =>
+                    `<li>Row ${row}: ${escapeHtml(email)}</li>`
+                ).join('');
+                innerHtml = `${limitNote}<ul style="margin:4px 0 0 16px;padding:0">${items}</ul>`;
+            }
+            ShowHtmlDialog('Check Emails', innerHtml, 400);
+        }
+
         createColumnsInCurrentSheet() {
             const FIELDS = GoogleSheetsSignups.GoogleSheetSignupQueue.FIELD_NAMES;
             const cfg = Configuration.config;
@@ -121,10 +143,10 @@ function OpenAboutDialog() {
     );
 }
 
-function ShowHtmlDialog(title: string, innerHtml: string) {
+function ShowHtmlDialog(title: string, innerHtml: string, height = 160) {
     const html = HtmlService.createHtmlOutput(
         '<div style="font-size:14px;line-height:1.6">' + innerHtml + '</div>'
-    ).setWidth(420).setHeight(160);
+    ).setWidth(420).setHeight(height);
     SpreadsheetApp.getUi().showModalDialog(html, title);
 }
 
@@ -167,6 +189,9 @@ function ShowSummaryForDryRun() {
 function CreateColumnsInCurrentSheet() {
     (new Main.SignupsImporter()).createColumnsInCurrentSheet()
 }
+function CheckEmails() {
+    (new Main.SignupsImporter()).checkEmails()
+}
 
 function onOpen() {
     var ui = SpreadsheetApp.getUi();
@@ -175,6 +200,10 @@ function onOpen() {
             // Allow user to normalize a list and review the result before importing to mailing list.
             ui.createMenu("Normalize list")
                 .addItem('Normalize Chuffed list', 'NormalizeChuffedList') // normalize lists from Chuffed donation platform
+        )
+        .addSubMenu(
+            ui.createMenu('Validate')
+                .addItem('Check emails', 'CheckEmails')
         )
         .addSubMenu(
             // Allow user to test processing of a normalized sheet without actually importing. This is useful
