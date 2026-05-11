@@ -140,8 +140,12 @@ namespace GoogleSheetsSignups {
             }
 
             const FIELDS = GoogleSheetSignupQueue.FIELD_NAMES;
+            const source = this.getFieldValueForCurrentRow(FIELDS.SOURCE)!;
+            if (source.trim() === '') {
+                throw new Error(`"${FIELDS.SOURCE}" value is blank.`);
+            }
             const signup: SignupService.Signup = {
-                "source": this.getFieldValueForCurrentRow(FIELDS.SOURCE)!,
+                "source": source,
                 "email": this.getFieldValueForCurrentRow(FIELDS.EMAIL)!,
             };
             if (this.headers.indexOf(FIELDS.FULL_NAME) !== -1) {
