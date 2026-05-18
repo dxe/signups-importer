@@ -1,3 +1,4 @@
+/// <reference types="google-apps-script" />
 /// <reference path="../global-sheet-config.ts" />
 /// <reference path="../signups-service.ts" />
 /// <reference path="../signups-processor.ts" />
@@ -119,37 +120,133 @@ describe('getUnprocessedSignups', () => {
         expect(results[0].signup.email).toBe('b@test.com');
     });
 
-    it('builds signup with first/last name fields', () => {
-        const row = ['', '', 'petitions', 'Jane', 'jane@test.com', 'selector-1'];
-        const queue = makeValidQueue([row]);
+    describe('name fields', () => {
+        it('sets first_name from First Name column', () => {
+            const row = ['', '', 'petitions', 'Jane', 'jane@test.com', 'selector-1'];
+            const queue = makeValidQueue([row]);
 
-        const [{ signup }] = [...queue.getUnprocessedSignups()];
-        expect(signup.source).toBe('petitions');
-        expect(signup.first_name).toBe('Jane');
-        expect(signup.email).toBe('jane@test.com');
-        expect(signup.drip_selector).toBe('selector-1');
-        expect(signup.name).toBeUndefined();
+            const [{ signup }] = [...queue.getUnprocessedSignups()];
+            expect(signup.first_name).toBe('Jane');
+            expect(signup.name).toBeUndefined();
+        });
+
+        it('sets last_name from Last Name column', () => {
+            const { statusColumnName, timestampColumnName } = (globalThis as any).Configuration.config;
+            const f = F();
+            const sheet = makeSheet([
+                [statusColumnName, timestampColumnName, f.SOURCE, f.FIRST_NAME, f.LAST_NAME, f.EMAIL, f.DRIP_SELECTOR],
+                ['', '', 'src', 'Jane', 'Doe', 'jane@test.com', 'NONE'],
+            ]);
+            const queue = new GoogleSheetsSignups.GoogleSheetSignupQueue(sheet, statusColumnName, timestampColumnName);
+
+            const [{ signup }] = [...queue.getUnprocessedSignups()];
+            expect(signup.first_name).toBe('Jane');
+            expect(signup.last_name).toBe('Doe');
+        });
+
+        it('sets name from Full Name column instead of first/last name', () => {
+            const { statusColumnName, timestampColumnName } = (globalThis as any).Configuration.config;
+            const f = F();
+            const sheet = makeSheet([
+                [statusColumnName, timestampColumnName, f.SOURCE, f.FULL_NAME, f.EMAIL, f.DRIP_SELECTOR],
+                ['', '', 'src', 'Jane Doe', 'jane@test.com', 'NONE'],
+            ]);
+            const queue = new GoogleSheetsSignups.GoogleSheetSignupQueue(sheet, statusColumnName, timestampColumnName);
+
+            const [{ signup }] = [...queue.getUnprocessedSignups()];
+            expect(signup.name).toBe('Jane Doe');
+            expect((signup as any).first_name).toBeUndefined();
+            expect((signup as any).last_name).toBeUndefined();
+        });
     });
 
-    it('maps DEFAULT drip selector to empty string', () => {
-        const row = ['', '', 'src', 'Jane', 'jane@test.com', 'DEFAULT'];
-        const queue = makeValidQueue([row]);
+    describe('optional fields', () => {
+        it('maps all optional fields when populated', () => {
+            const { statusColumnName, timestampColumnName } = (globalThis as any).Configuration.config;
+            const f = F();
+            const sheet = makeSheet([
+                [statusColumnName, timestampColumnName, f.SOURCE, f.FIRST_NAME, f.EMAIL,
+                 f.PHONE, f.ZIP, f.COUNTRY, f.CHAPTER_ID,
+                 f.DONATION_TYPE, f.DONATION_AMOUNT, f.DONATION_DATE, f.DRIP_SELECTOR],
+                ['', '', 'src', 'Jane', 'jane@test.com',
+                 '555-1234', '94107', 'US', '42',
+                 'one-time', '100', '2026-01-01', 'NONE'],
+            ]);
+            const queue = new GoogleSheetsSignups.GoogleSheetSignupQueue(sheet, statusColumnName, timestampColumnName);
 
-        const [{ signup }] = [...queue.getUnprocessedSignups()];
-        expect(signup.drip_selector).toBe('');
+            const [{ signup }] = [...queue.getUnprocessedSignups()];
+            expect(signup.phone).toBe('555-1234');
+            expect(signup.zip).toBe('94107');
+            expect(signup.country).toBe('US');
+            expect(signup.target_chapter_id).toBe(42);
+            expect(signup.donation_type).toBe('one-time');
+            expect(signup.donation_amount).toBe('100');
+            expect(signup.donation_date).toBe('2026-01-01');
+        });
+
+        it('omits optional fields when cells are blank', () => {
+            const { statusColumnName, timestampColumnName } = (globalThis as any).Configuration.config;
+            const f = F();
+            const sheet = makeSheet([
+                [statusColumnName, timestampColumnName, f.SOURCE, f.FIRST_NAME, f.EMAIL,
+                 f.PHONE, f.ZIP, f.COUNTRY, f.CHAPTER_ID,
+                 f.DONATION_TYPE, f.DONATION_AMOUNT, f.DONATION_DATE, f.DRIP_SELECTOR],
+                ['', '', 'src', 'Jane', 'jane@test.com',
+                 '', '', '', '',
+                 '', '', '', 'NONE'],
+            ]);
+            const queue = new GoogleSheetsSignups.GoogleSheetSignupQueue(sheet, statusColumnName, timestampColumnName);
+
+            const [{ signup }] = [...queue.getUnprocessedSignups()];
+            expect(signup.phone).toBeUndefined();
+            expect(signup.zip).toBeUndefined();
+            expect(signup.country).toBeUndefined();
+            expect(signup.target_chapter_id).toBeUndefined();
+            expect(signup.donation_type).toBeUndefined();
+            expect(signup.donation_amount).toBeUndefined();
+            expect(signup.donation_date).toBeUndefined();
+        });
     });
 
-    it('throws when source cell is blank', () => {
-        const row = ['', '', '', 'Jane', 'jane@test.com', 'NONE'];
-        const queue = makeValidQueue([row]);
+    describe('source field', () => {
+        it('throws when source cell is blank', () => {
+            const row = ['', '', '', 'Jane', 'jane@test.com', 'NONE'];
+            const queue = makeValidQueue([row]);
 
-        expect(() => [...queue.getUnprocessedSignups()]).toThrow(/"Source"/);
+            expect(() => [...queue.getUnprocessedSignups()]).toThrow(/"Source"/);
+        });
     });
 
-    it('throws when drip selector cell is blank', () => {
-        const row = ['', '', 'src', 'Jane', 'jane@test.com', ''];
-        const queue = makeValidQueue([row]);
+    describe('drip selector', () => {
+        it('passes through a literal selector value', () => {
+            const row = ['', '', 'petitions', 'Jane', 'jane@test.com', 'selector-1'];
+            const queue = makeValidQueue([row]);
 
-        expect(() => [...queue.getUnprocessedSignups()]).toThrow(/"Drip Selector"/);
+            const [{ signup }] = [...queue.getUnprocessedSignups()];
+            expect(signup.drip_selector).toBe('selector-1');
+        });
+
+        it('passes through NONE as-is', () => {
+            const row = ['', '', 'src', 'Jane', 'jane@test.com', 'NONE'];
+            const queue = makeValidQueue([row]);
+
+            const [{ signup }] = [...queue.getUnprocessedSignups()];
+            expect(signup.drip_selector).toBe('NONE');
+        });
+
+        it('maps DEFAULT to empty string', () => {
+            const row = ['', '', 'src', 'Jane', 'jane@test.com', 'DEFAULT'];
+            const queue = makeValidQueue([row]);
+
+            const [{ signup }] = [...queue.getUnprocessedSignups()];
+            expect(signup.drip_selector).toBe('');
+        });
+
+        it('throws when drip selector cell is blank', () => {
+            const row = ['', '', 'src', 'Jane', 'jane@test.com', ''];
+            const queue = makeValidQueue([row]);
+
+            expect(() => [...queue.getUnprocessedSignups()]).toThrow(/"Drip Selector"/);
+        });
     });
 });
