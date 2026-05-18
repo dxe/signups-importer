@@ -168,10 +168,10 @@ namespace GoogleSheetsSignups {
                 throw new Error(`"${FIELDS.DRIP_SELECTOR}" value is blank. Use "NONE" to omit drip selector or "DEFAULT" to send a blank drip selector.`);
             } else if (dripSelector.trim() === 'DEFAULT') {
                 signup.drip_selector = '';
-            } else if (dripSelector.trim() !== 'NONE') {
+            } else {
+                // Includes "NONE" case, which is understood by Signup service.
                 signup.drip_selector = dripSelector;
             }
-
 
             return signup;
         }
