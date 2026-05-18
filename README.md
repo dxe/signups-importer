@@ -90,7 +90,13 @@ Make sure you're logged in.
 pnpm exec clasp login
 ```
 
-Push according to .clasp.json
+Run tests and push in one step:
+
+```bash
+pnpm push
+```
+
+Or push directly (skipping tests):
 
 ```bash
 pnpm exec clasp push
