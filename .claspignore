@@ -1,0 +1,5 @@
+node_modules/**
+test/**
+*.test.ts
+*.test.js
+vitest.config.ts

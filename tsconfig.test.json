@@ -1,0 +1,21 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        // CommonJS lets test files use ES module imports (e.g. `import { describe } from 'vitest'`).
+        // Source files have no imports/exports so TypeScript treats them as scripts; their namespace
+        // declarations become globally available to the test module files.
+        "module": "CommonJS",
+        "moduleResolution": "node",
+        // Add "node" for test/setup.ts (uses fs, path, vm) and keep "google-apps-script" so the
+        // /// <reference path> directives in test files can resolve GAS types in source files.
+        "types": ["google-apps-script", "node"],
+        "noEmit": true,
+        // Third-party type declarations (vitest, @types/node) target TypeScript 5.x and produce
+        // errors under the TypeScript 4.x version installed with clasp. skipLibCheck silences
+        // those without hiding errors in our own source and test files.
+        "skipLibCheck": true
+    },
+    // Override base excludes so the test/ directory is included.
+    "include": ["./**/*.ts"],
+    "exclude": ["node_modules"]
+}

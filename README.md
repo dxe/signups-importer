@@ -63,21 +63,37 @@ namespace B {
 Install dependencies:
 
 ```bash
-npm i
+pnpm install
 ```
+
+## Testing
+
+Run the unit tests:
+
+```bash
+pnpm test
+```
+
+Run in watch mode during development:
+
+```bash
+pnpm test:watch
+```
+
+The tests use [Vitest](https://vitest.dev/) and live in the `test/` directory. Because Google Apps Script uses TypeScript namespaces instead of ES modules, `test/setup.ts` transpiles each source file with esbuild and loads them into the global scope via `vm.runInThisContext`, mirroring how clasp concatenates files at deploy time.
 
 ## Deploy
 
 Make sure you're logged in.
 
 ```bash
-npx clasp login
+pnpm exec clasp login
 ```
 
 Push according to .clasp.json
 
 ```bash
-npx clasp push
+pnpm exec clasp push
 ```
 
 ## Initial setup

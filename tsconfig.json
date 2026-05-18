@@ -3,7 +3,8 @@
         "./**/*"
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "test"
     ],
     "compilerOptions": {
         // Not actually sure what version most closely resembles what Apps Script V8 runtime runs on.
