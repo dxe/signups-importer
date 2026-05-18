@@ -96,6 +96,14 @@ Push according to .clasp.json
 pnpm exec clasp push
 ```
 
+## Git hooks
+
+This project includes a pre-push hook that runs the test suite before every push. To activate it:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 ## Initial setup
 
 Create a spreadsheet and click Extensions -> Apps Script to create an
