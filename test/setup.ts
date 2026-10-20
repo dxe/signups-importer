@@ -24,6 +24,7 @@ for (const file of [
     'signups-processor.ts',
     'google-sheets-queue.ts',
     'signup-validation.ts',
+    'email-autofix.ts',
     'sheet-mutations.ts',
     'list-normalization.ts',
 ]) {

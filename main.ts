@@ -94,6 +94,28 @@ namespace Main {
             }
         }
 
+        autoFixEmails() {
+            const sheet = this.getActiveSheet();
+            let changes: SheetMutations.EmailFix[];
+            try {
+                changes = SheetMutations.autoFixEmails(sheet);
+            } catch (e) {
+                SpreadsheetApp.getUi().alert((e as Error).message);
+                return;
+            }
+            const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            let innerHtml: string;
+            if (changes.length === 0) {
+                innerHtml = '<p>No email fixes needed.</p>';
+            } else {
+                const items = changes.map(({ row, original, fixed }) =>
+                    `<li>Row ${row}: ${escapeHtml(original)} → ${escapeHtml(fixed)}</li>`
+                ).join('');
+                innerHtml = `<p>${changes.length} email${changes.length === 1 ? '' : 's'} fixed:</p><ul style="margin:4px 0 0 16px;padding:0">${items}</ul>`;
+            }
+            ShowHtmlDialog('Auto-fix Emails', innerHtml, 400);
+        }
+
         checkEmails() {
             const result = SignupValidation.findInvalidEmails(this.getActiveSheet());
             if ('error' in result) {
@@ -168,6 +190,9 @@ function NormalizeChuffedList() {
 function SplitFullNameColumn() {
     (new Main.SignupsImporter()).splitFullNameColumn()
 }
+function AutoFixEmails() {
+    (new Main.SignupsImporter()).autoFixEmails()
+}
 function StartOrContinueDryRun1() {
     (new Main.SignupsImporter()).importActiveSheetDryRun(1)
 }
@@ -219,6 +244,7 @@ function onOpen() {
             ui.createMenu("Normalize list")
                 .addItem('Normalize Chuffed list', 'NormalizeChuffedList') // normalize lists from Chuffed donation platform
                 .addItem('Split "Full Name" column', 'SplitFullNameColumn')
+                .addItem('Auto-fix emails', 'AutoFixEmails')
         )
         .addSubMenu(
             ui.createMenu('Validate')

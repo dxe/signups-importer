@@ -50,4 +50,37 @@ namespace SheetMutations {
         sheet.getRange(2, newFirstNameColIdx + 1, lastRow - 1, 1).setValues(firstNames);
         sheet.getRange(2, newLastNameColIdx + 1, lastRow - 1, 1).setValues(lastNames);
     }
+
+    export type EmailFix = { row: number; original: string; fixed: string };
+
+    export function autoFixEmails(sheet: Sheet): EmailFix[] {
+        const lastCol = sheet.getLastColumn();
+        const lastRow = sheet.getLastRow();
+        const FIELDS = GoogleSheetsSignups.GoogleSheetSignupQueue.FIELD_NAMES;
+
+        const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0] as string[];
+        const emailColIdx = headers.indexOf(FIELDS.EMAIL);
+        if (emailColIdx === -1) {
+            throw new Error(`No "${FIELDS.EMAIL}" column found in this sheet.`);
+        }
+        if (lastRow < 2) {
+            throw new Error('No data rows found.');
+        }
+
+        const emailValues = sheet.getRange(2, emailColIdx + 1, lastRow - 1, 1).getValues();
+        const changes: EmailFix[] = [];
+        for (let i = 0; i < emailValues.length; i++) {
+            const original = String(emailValues[i][0]).trim();
+            if (!original) continue;
+            const fixed = EmailAutofix.fixEmailDomain(original);
+            if (fixed !== original) {
+                changes.push({ row: i + 2, original, fixed });
+                emailValues[i][0] = fixed;
+            }
+        }
+        if (changes.length > 0) {
+            sheet.getRange(2, emailColIdx + 1, lastRow - 1, 1).setValues(emailValues);
+        }
+        return changes;
+    }
 }
