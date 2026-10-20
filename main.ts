@@ -124,8 +124,10 @@ namespace Main {
             }
             const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
             let innerHtml: string;
+            let height: number;
             if (result.length === 0) {
                 innerHtml = '<p>All emails are valid!</p>';
+                height = 160;
             } else {
                 const limitNote = result.length >= 1000
                     ? '<p style="color:#888;font-size:12px">Showing first 1000 invalid emails.</p>'
@@ -133,9 +135,34 @@ namespace Main {
                 const items = result.map(({ row, email }) =>
                     `<li>Row ${row}: ${escapeHtml(email)}</li>`
                 ).join('');
-                innerHtml = `${limitNote}<ul style="margin:4px 0 0 16px;padding:0">${items}</ul>`;
+                const confirmMsg = result.length >= 1000
+                    ? 'Delete all rows with invalid emails (1000+ found)?'
+                    : `Delete ${result.length} row${result.length === 1 ? '' : 's'} with invalid emails?`;
+                const deleteButton =
+                    `<div style="margin-bottom:10px">` +
+                    `<button onclick="deleteInvalid(this)">Delete rows with invalid emails</button>` +
+                    `</div>` +
+                    `<script>function deleteInvalid(btn){` +
+                    `if(!confirm(${JSON.stringify(confirmMsg)}))return;` +
+                    `btn.disabled=true;btn.textContent='Deleting…';` +
+                    `google.script.run` +
+                    `.withSuccessHandler(function(){google.script.host.close();})` +
+                    `.withFailureHandler(function(e){alert(e.message);btn.disabled=false;btn.textContent='Delete rows with invalid emails';})` +
+                    `.DeleteInvalidEmailRows();` +
+                    `}<\/script>`;
+                innerHtml = `${limitNote}${deleteButton}<ul style="margin:4px 0 0 16px;padding:0">${items}</ul>`;
+                height = 430;
             }
-            ShowHtmlDialog('Check Emails', innerHtml, 400);
+            ShowHtmlDialog('Check Emails', innerHtml, height);
+        }
+
+        deleteInvalidEmailRows() {
+            const sheet = this.getActiveSheet();
+            try {
+                SheetMutations.deleteRowsWithInvalidEmails(sheet);
+            } catch (e) {
+                SpreadsheetApp.getUi().alert((e as Error).message);
+            }
         }
 
         createColumnsInCurrentSheet() {
@@ -235,6 +262,9 @@ function CreateColumnsInCurrentSheet() {
 function CheckEmails() {
     (new Main.SignupsImporter()).checkEmails()
 }
+function DeleteInvalidEmailRows() {
+    (new Main.SignupsImporter()).deleteInvalidEmailRows()
+}
 
 function onOpen() {
     var ui = SpreadsheetApp.getUi();
@@ -249,6 +279,7 @@ function onOpen() {
         .addSubMenu(
             ui.createMenu('Validate')
                 .addItem('Check emails', 'CheckEmails')
+                .addItem('Delete rows with invalid emails', 'DeleteInvalidEmailRows')
         )
         .addSubMenu(
             // Allow user to test processing of a normalized sheet without actually importing. This is useful

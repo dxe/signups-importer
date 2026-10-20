@@ -83,4 +83,32 @@ namespace SheetMutations {
         }
         return changes;
     }
+
+    export function deleteRowsWithInvalidEmails(sheet: Sheet): number {
+        const lastCol = sheet.getLastColumn();
+        const lastRow = sheet.getLastRow();
+        const FIELDS = GoogleSheetsSignups.GoogleSheetSignupQueue.FIELD_NAMES;
+
+        const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0] as string[];
+        const emailColIdx = headers.indexOf(FIELDS.EMAIL);
+        if (emailColIdx === -1) {
+            throw new Error(`No "${FIELDS.EMAIL}" column found in this sheet.`);
+        }
+        if (lastRow < 2) {
+            throw new Error('No data rows found.');
+        }
+
+        const emailValues = sheet.getRange(2, emailColIdx + 1, lastRow - 1, 1).getValues();
+        const rowsToDelete: number[] = [];
+        for (let i = 0; i < emailValues.length; i++) {
+            const email = String(emailValues[i][0]).trim();
+            if (email && !SignupValidation.isValidEmail(email)) {
+                rowsToDelete.push(i + 2);
+            }
+        }
+        for (const row of rowsToDelete.reverse()) {
+            sheet.deleteRow(row);
+        }
+        return rowsToDelete.length;
+    }
 }
